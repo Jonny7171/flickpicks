@@ -12,5 +12,6 @@ A description of your project
 4. Shaili Kadakia (s3kadaki@uwaterloo.ca)
 
 
-## Link to your Team Contract wiki page.
+[Link to Team Contract wiki page](https://git.uwaterloo.ca/s3kadaki/cs346-project-test/-/wikis/CS346-Team-Contract)
+
 
