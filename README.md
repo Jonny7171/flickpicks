@@ -4,7 +4,7 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 
 ## Team Details
 * Team number: LAB101-6
-* Team members:listed in in alphabetical order. Include full names and email addresses.
+* Team members:
 1. Jonathan Gagnon (j23gagno@uwaterloo.ca)
 2. Malvika Patel (mk6patel@uwaterloo.ca)
 3. Neha Padala (spadala@uwaterloo.ca)
