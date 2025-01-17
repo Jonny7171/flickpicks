@@ -10,7 +10,8 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 3. Neha Padala (spadala@uwaterloo.ca)
 4. Shaili Kadakia (s3kadaki@uwaterloo.ca)
 
-
-[Link to Team Contract wiki page](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/CS346-FlickPicks-Team-Contract)
+Deliverables 
+- [Link to Team Contract wiki page](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/CS346-FlickPicks-Team-Contract)
+- [Link to Project Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/FlickPicks-Project-Proposal)
 
 
