@@ -13,5 +13,6 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 Deliverables 
 - [Link to Team Contract wiki page](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/CS346-FlickPicks-Team-Contract)
 - [Link to Project Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/FlickPicks-Project-Proposal)
+- [Link to Design Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Design-Proposal)
 
 
