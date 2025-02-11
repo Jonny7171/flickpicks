@@ -1,8 +1,16 @@
 package com.example.flickpicks.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.flickpicks.ui.theme.GreenJC
+import com.example.flickpicks.ui.theme.BlueNew
 
 @Composable
 fun Entry(
@@ -40,7 +48,7 @@ fun Entry(
                 onClick = {
                      navController.navigate(Screens.SignIn.screen)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = GreenJC)
+                colors = ButtonDefaults.buttonColors(containerColor = BlueNew)
             ) {
                 Text(
                     text = "Sign In",
