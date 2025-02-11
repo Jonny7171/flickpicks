@@ -1,11 +1,9 @@
 package com.example.flickpicks
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,33 +14,34 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.flickpicks.ui.screens.Entry
 import com.example.flickpicks.ui.screens.Friends
+import com.example.flickpicks.ui.screens.MovieDetailScreen
 import com.example.flickpicks.ui.screens.MyFeed
 import com.example.flickpicks.ui.screens.Party
 import com.example.flickpicks.ui.screens.Profile
 import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.screens.Search
-import com.example.flickpicks.ui.screens.Entry
-import com.example.flickpicks.ui.screens.SignUp
 import com.example.flickpicks.ui.screens.SignIn
+import com.example.flickpicks.ui.screens.SignUp
+import com.example.flickpicks.ui.screens.mockReviews
+import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
 import com.example.flickpicks.ui.theme.GreenJC
 
@@ -72,7 +71,7 @@ fun BottomNavigationBar() {
     Scaffold (
         bottomBar = {
             if (shouldShowBottomBar) {
-                BottomAppBar(containerColor = GreenJC) {
+                BottomAppBar(containerColor = BlueNew) {
                     IconButton(
                         onClick = {
                             selected.value = Icons.Default.Search
@@ -86,7 +85,7 @@ fun BottomNavigationBar() {
                             Icons.Default.Search,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Search) Color.White else Color.DarkGray
+                            tint = if (selected.value == Icons.Default.Search) GreenJC else Color.LightGray
                         )
                     }
                     IconButton(
@@ -102,7 +101,7 @@ fun BottomNavigationBar() {
                             Icons.Default.Face,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Face) Color.White else Color.DarkGray
+                            tint = if (selected.value == Icons.Default.Face) GreenJC else Color.LightGray
                         )
                     }
                     IconButton(
@@ -118,7 +117,7 @@ fun BottomNavigationBar() {
                             Icons.Default.Menu,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Menu) Color.White else Color.DarkGray
+                            tint = if (selected.value == Icons.Default.Menu) GreenJC else Color.LightGray
                         )
                     }
 
@@ -135,7 +134,7 @@ fun BottomNavigationBar() {
                             Icons.Default.Person,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Person) Color.White else Color.DarkGray
+                            tint = if (selected.value == Icons.Default.Person) GreenJC else Color.LightGray
                         )
                     }
 
@@ -152,7 +151,7 @@ fun BottomNavigationBar() {
                             Icons.Default.AccountBox,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.AccountBox) Color.White else Color.DarkGray
+                            tint = if (selected.value == Icons.Default.AccountBox) GreenJC else Color.LightGray
                         )
                     }
                 }
@@ -173,11 +172,19 @@ fun BottomNavigationBar() {
             composable(Screens.SignIn.screen) {
                 SignIn(navController = navigationController)
             }
+            composable(Screens.MyFeed.screen)  {
+                MyFeed(navController = navigationController)
+            }
             composable(Screens.Search.screen)  { Search() }
             composable(Screens.Friends.screen) { Friends() }
-            composable(Screens.MyFeed.screen)  { MyFeed() }
             composable(Screens.Party.screen)   { Party() }
             composable(Screens.Profile.screen) { Profile() }
+            composable(Screens.MovieDetail.screen) { backStackEntry ->
+                val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+                if (movieId != null) {
+                    MovieDetailScreen(movieId, mockReviews, navigationController)
+                }
+            }
         }
     }
 

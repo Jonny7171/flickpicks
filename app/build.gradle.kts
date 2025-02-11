@@ -96,6 +96,8 @@ dependencies {
     testImplementation(libs.androidx.core.testing.v210)
     testImplementation(libs.robolectric)
 
+    implementation(libs.coil.compose)
+
     // Test Task Configuration for JUnit 5
     tasks.withType<Test> {
         useJUnitPlatform()
