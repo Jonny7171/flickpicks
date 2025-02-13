@@ -29,6 +29,11 @@ data class UserProfile(
     val profilePicUrl: String
 )
 
+data class PartyGroup(
+    val id: Int,
+    val name: String
+)
+
 data class Genre (
     val name: String,
     val count: Int
