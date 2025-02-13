@@ -30,14 +30,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.Entry
 import com.example.flickpicks.ui.screens.Friends
 import com.example.flickpicks.ui.screens.MovieDetailScreen
 import com.example.flickpicks.ui.screens.MyFeed
 import com.example.flickpicks.ui.screens.Party
+import com.example.flickpicks.ui.screens.PartyGroup
 import com.example.flickpicks.ui.screens.Profile
 import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.screens.Search
+import com.example.flickpicks.ui.screens.Settings
 import com.example.flickpicks.ui.screens.SignIn
 import com.example.flickpicks.ui.screens.SignUp
 import com.example.flickpicks.ui.screens.mockReviews
@@ -177,8 +180,22 @@ fun BottomNavigationBar() {
             }
             composable(Screens.Search.screen)  { Search() }
             composable(Screens.Friends.screen) { Friends() }
-            composable(Screens.Party.screen)   { Party() }
-            composable(Screens.Profile.screen) { Profile() }
+            composable(Screens.Party.screen)   {
+                Party(navController = navigationController)
+            }
+            composable(Screens.Profile.screen) {
+                Profile(navController = navigationController)
+            }
+            composable(Screens.EditProfile.screen) {
+                EditProfile(navController = navigationController)
+            }
+            composable(Screens.Settings.screen) {
+                Settings(navController = navigationController)
+            }
+            composable(Screens.PartyGroup.screen) {
+                PartyGroup(navController = navigationController)
+            }
+
             composable(Screens.MovieDetail.screen) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
                 if (movieId != null) {
