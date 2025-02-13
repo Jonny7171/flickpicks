@@ -16,4 +16,7 @@ Deliverables
 - [Link to Design Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Design-Proposal)
 - [Link to Meeting Minutes](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Meeting-Minutes)
 
+## Releases
+- [Version 0.1.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.1.0-Release)
+
 
