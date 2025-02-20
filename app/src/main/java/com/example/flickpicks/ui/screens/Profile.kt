@@ -1,37 +1,65 @@
 package com.example.flickpicks.ui.screens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.data.model.UserProfile
+import com.example.flickpicks.ui.screens.Screens
+import com.example.flickpicks.ui.viewmodels.MainViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.ui.text.font.FontWeight
-
-
-
-val mockUser = UserProfile(6, "Jane Doe", "...")
 
 @Composable
 fun Profile(navController: NavController) {
-    fun performEdit() {
-        navController.navigate(Screens.EditProfile.screen)
+    val mainViewModel = viewModel<MainViewModel>(
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+    val currentUser = mainViewModel.getCurrentUser() // Assumes getCurrentUser() is implemented in MainViewModel
+
+    // Helper function to display a field or a default message if empty
+    fun displayField(field: String): String =
+        if (field.isBlank()) "Add information to have it show here" else field
+
+    // If no user data is found, show a placeholder message
+    if (currentUser == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("No user data found. Please sign up.")
+        }
+        return
     }
 
     Column(
@@ -48,9 +76,11 @@ fun Profile(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "My Profile", style=MaterialTheme.typography.headlineMedium)
-
-            IconButton(onClick = { navController.navigate(Screens.Settings.screen)  }) {
+            Text(
+                text = "My Profile",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            IconButton(onClick = { navController.navigate(Screens.Settings.screen) }) {
                 Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
             }
         }
@@ -58,8 +88,12 @@ fun Profile(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Profile Picture
+        val profilePicUrl = currentUser.profilePicUrl ?: ""
         Image(
-            painter = rememberAsyncImagePainter("...."),
+            painter = if (profilePicUrl.isNotBlank())
+                rememberAsyncImagePainter(profilePicUrl)
+            else
+                rememberAsyncImagePainter("https://via.placeholder.com/150"), // Placeholder image
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(150.dp)
@@ -69,9 +103,9 @@ fun Profile(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // User Name
+        // Display the User's Name
         Text(
-            text = mockUser.name,
+            text = displayField(currentUser.name),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -80,30 +114,35 @@ fun Profile(navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = { performEdit() },
+            onClick = { navController.navigate(Screens.EditProfile.screen) },
             modifier = Modifier.align(Alignment.CenterHorizontally),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
         ) {
             Text(text = "Edit Profile", color = Color.White)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
-                Text(text = "54", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                Text(text = "Followers", fontSize = 14.sp, color = Color.Gray)
-            }
-            Spacer(modifier = Modifier.width(32.dp)) // Space between followers and following
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
-                Text(text = "48", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                Text(text = "Following", fontSize = 14.sp, color = Color.Gray)
-            }
-        }
+        // Additional User Information
+        Text(
+            text = "Email: ${displayField(currentUser.email)}",
+            fontSize = 16.sp,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = "Phone: ${displayField(currentUser.phoneNumber)}",
+            fontSize = 16.sp,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = "Username: ${displayField(currentUser.userName)}",
+            fontSize = 16.sp,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Movie Preferences Section
@@ -116,11 +155,15 @@ fun Profile(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
-        PreferencesList(listOf("Sci-Fi", "Thriller", "Comedy", "Action"))
+        if (currentUser.moviesPreferences.isEmpty()) {
+            Text("Add information to have it show here", color = Color.Gray)
+        } else {
+            PreferencesList(currentUser.moviesPreferences)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Watch History
+        // Watch History Section
         Text(
             text = "Watch History",
             fontSize = 18.sp,
@@ -130,11 +173,15 @@ fun Profile(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
-        MovieList(listOf("Inception", "Interstellar", "Avatar"))
+        if (currentUser.moviesWatched.isEmpty()) {
+            Text("Add information to have it show here", color = Color.Gray)
+        } else {
+            MovieList(currentUser.moviesWatched)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Ratings & Reviews
+        // Ratings & Reviews Section
         Text(
             text = "Ratings & Reviews",
             fontSize = 18.sp,
@@ -144,11 +191,15 @@ fun Profile(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
-        RatingsList(listOf("Inception - 5⭐", "The Matrix - 4.5⭐", "Avatar - 4⭐"))
+        if (currentUser.moviesReviewed.isEmpty()) {
+            Text("Add information to have it show here", color = Color.Gray)
+        } else {
+            RatingsList(listOf("No ratings available"))
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Wish List
+        // Wish List Section (using moviesLiked as a stand-in)
         Text(
             text = "Wish List",
             fontSize = 18.sp,
@@ -158,14 +209,12 @@ fun Profile(navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
-        MovieList(listOf("Dune: Part Two", "Tenet", "Blade Runner 2049", "Oppenheimer"))
-
-
-
+        if (currentUser.moviesLiked.isEmpty()) {
+            Text("Add information to have it show here", color = Color.Gray)
+        } else {
+            MovieList(currentUser.moviesLiked)
+        }
     }
-
-
-
 }
 
 @Composable
@@ -209,4 +258,3 @@ fun RatingsList(ratings: List<String>) {
         }
     }
 }
-

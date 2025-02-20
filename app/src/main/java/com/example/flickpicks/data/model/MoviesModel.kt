@@ -25,8 +25,22 @@ data class MovieReview(
 
 data class UserProfile(
     val id: Int,
-    val name: String,
-    val profilePicUrl: String
+    val name: String, // Combined first and last name
+    val profilePicUrl: String? = null,
+    val userName: String = "",
+    val password: String = "",
+    val email: String = "",
+    val phoneNumber: String = "",
+    val friends: MutableList<String> = mutableListOf(),
+    val blockedUsers: MutableList<String> = mutableListOf(),
+    val incomingPendingFriends: MutableList<String> = mutableListOf(),
+    val outgoingPendingFriends: MutableList<String> = mutableListOf(),
+    val moviesWatched: MutableList<String> = mutableListOf(),
+    val moviesRated: MutableList<String> = mutableListOf(),
+    val moviesReviewed: MutableList<String> = mutableListOf(),
+    val moviesLiked: MutableList<String> = mutableListOf(),
+    val moviesDisliked: MutableList<String> = mutableListOf(),
+    val moviesPreferences: MutableList<String> = mutableListOf()
 )
 
 data class PartyGroup(

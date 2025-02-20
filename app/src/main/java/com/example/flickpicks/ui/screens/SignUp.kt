@@ -1,5 +1,6 @@
 package com.example.flickpicks.ui.screens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +17,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.flickpicks.ui.screens.Screens
+import com.example.flickpicks.ui.viewmodels.MainViewModel
 
 @Composable
 fun SignUp(navController: NavController) {
+    // Get the MainViewModel instance
+    val mainViewModel = viewModel<MainViewModel>(
+        viewModelStoreOwner = LocalContext.current as ComponentActivity
+    )
+
     // Field values
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -37,22 +47,14 @@ fun SignUp(navController: NavController) {
     var usernameError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
+    // Mark fields as error if they're empty
     fun validateFields() {
-        // Reset all errors first
-        firstNameError = false
-        lastNameError = false
-        emailError = false
-        phoneError = false
-        usernameError = false
-        passwordError = false
-
-        // Mark fields as error if they're empty
-        if (firstName.isBlank()) firstNameError = true
-        if (lastName.isBlank()) lastNameError = true
-        if (email.isBlank()) emailError = true
-        if (phoneNumber.isBlank()) phoneError = true
-        if (username.isBlank()) usernameError = true
-        if (password.isBlank()) passwordError = true
+        firstNameError = firstName.isBlank()
+        lastNameError = lastName.isBlank()
+        emailError = email.isBlank()
+        phoneError = phoneNumber.isBlank()
+        usernameError = username.isBlank()
+        passwordError = password.isBlank()
     }
 
     fun performSignUp() {
@@ -67,6 +69,20 @@ fun SignUp(navController: NavController) {
             return
         }
 
+        // Combine first and last name
+        val fullName = "$firstName $lastName".trim()
+
+        // Create and save a new UserProfile using the MainViewModel function
+        mainViewModel.signUpUser(
+            name = fullName,
+            userName = username,
+            password = password,
+            email = email,
+            phoneNumber = phoneNumber,
+            profilePicUrl = null
+        )
+
+        // Navigate to the MyFeed screen after successful sign up
         navController.navigate(Screens.MyFeed.screen) {
             popUpTo(Screens.Entry.screen) { inclusive = true }
         }
@@ -94,8 +110,6 @@ fun SignUp(navController: NavController) {
             isError = firstNameError,
             modifier = Modifier.fillMaxWidth()
         )
-
-        // Error text
         if (firstNameError) {
             Text(
                 text = "Please enter a first name",
@@ -104,7 +118,7 @@ fun SignUp(navController: NavController) {
             )
         }
 
-        // Error text
+        // LAST NAME
         OutlinedTextField(
             value = lastName,
             onValueChange = {
@@ -123,7 +137,7 @@ fun SignUp(navController: NavController) {
             )
         }
 
-        // Error text
+        // EMAIL
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -142,7 +156,7 @@ fun SignUp(navController: NavController) {
             )
         }
 
-        // Error text
+        // PHONE NUMBER
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = {
@@ -161,7 +175,7 @@ fun SignUp(navController: NavController) {
             )
         }
 
-        // Error text
+        // USERNAME
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -180,7 +194,7 @@ fun SignUp(navController: NavController) {
             )
         }
 
-        // Error text
+        // PASSWORD
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -201,7 +215,7 @@ fun SignUp(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Complete Sign Up
+        // Complete Sign Up Button
         Button(
             onClick = { performSignUp() },
             modifier = Modifier.fillMaxWidth()
