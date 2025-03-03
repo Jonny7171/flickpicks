@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -53,10 +54,13 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.junit.jupiter)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
@@ -86,6 +90,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(libs.coil.compose)
+
+    // Database setup and connection to Firestore
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+
+
     // Unit testing dependencies (JUnit 5, MockK, Robolectric)
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.engine)
@@ -95,8 +108,20 @@ dependencies {
     testImplementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.androidx.core.testing.v210)
     testImplementation(libs.robolectric)
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+  //  testImplementation(libs.mockito.inline)
+  //  testImplementation(libs.mockito.kotlin)
+  //  testImplementation(libs.coroutines.test)
+    // testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    //testImplementation("org.mockito:mockito-core:5.3.1")
+    //testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
-    implementation(libs.coil.compose)
+
+
 
     // Test Task Configuration for JUnit 5
     tasks.withType<Test> {
