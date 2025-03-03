@@ -1,5 +1,7 @@
 package com.example.flickpicks.ui.screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.viewmodels.MainViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SignUp(navController: NavController) {
@@ -46,6 +49,10 @@ fun SignUp(navController: NavController) {
     var phoneError by remember { mutableStateOf(false) }
     var usernameError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+
+    var auth = FirebaseAuth.getInstance()
+    var firebaseErrorMessage by remember { mutableStateOf("") }
+
 
     // Mark fields as error if they're empty
     fun validateFields() {
@@ -71,6 +78,22 @@ fun SignUp(navController: NavController) {
 
         // Combine first and last name
         val fullName = "$firstName $lastName".trim()
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Sign-up successful
+                    Log.d("SignUp", "createUserWithEmail:success")
+                    navController.navigate(Screens.MyFeed.screen) {
+                        popUpTo(Screens.Entry.screen) { inclusive = true }
+                    }
+                } else {
+                    // Sign-up failed
+                    Log.w("SignUp", "createUserWithEmail:failure", task.exception)
+                    val exceptionMessage = task.exception?.message ?: "Unknown error"
+                    firebaseErrorMessage = exceptionMessage
+
+                }
+            }
 
         // Create and save a new UserProfile using the MainViewModel function
         mainViewModel.signUpUser(
@@ -214,6 +237,14 @@ fun SignUp(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        if (firebaseErrorMessage.isNotEmpty()) {
+            Text(
+                text = firebaseErrorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         // Complete Sign Up Button
         Button(

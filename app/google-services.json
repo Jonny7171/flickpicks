@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "717766406707",
+    "project_id": "cs346-flickpicks",
+    "storage_bucket": "cs346-flickpicks.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717766406707:android:db59d4d06434f4dd6de946",
+        "android_client_info": {
+          "package_name": "com.example.flickpicks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUuy5fstqfu3TaVTvk1nbVGUWClh4lY0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
