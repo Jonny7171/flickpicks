@@ -1,37 +1,69 @@
 package com.example.flickpicks.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun SignIn(navController: NavController) {
     // Field values
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     // Error states
-    var usernameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
+    var auth = FirebaseAuth.getInstance()
+    var firebaseErrorMessage by remember { mutableStateOf("") }
+    var userDetails by remember { mutableStateOf<String>("") }
+
+
     fun validateFields() {
-        usernameError = username.isBlank()
+        emailError = email.isBlank()
         passwordError = password.isBlank()
+    }
+
+    fun updateUI(user: FirebaseUser?) {
+        if (user != null) {
+            userDetails = "Signed in as: ${user.email}"
+            navController.navigate(Screens.MyFeed.screen) {
+                popUpTo(Screens.Entry.screen) { inclusive = true }
+            }
+        } else {
+            userDetails = "Please try again or check your credentials."
+        }
+
     }
 
     fun performSignIn() {
         validateFields()
-        if (usernameError || passwordError) {
+        if (emailError || passwordError) {
             return
         }
-        // TODO: Add real authentication logic
-        // For now, just navigate to MyFeed if successful
-        navController.navigate(Screens.MyFeed.screen) {
-            popUpTo(Screens.Entry.screen) { inclusive = true }
-        }
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Sign-in successful
+                    Log.d("SignIn", "signInWithEmail:success")
+                    val user = auth.currentUser
+                    navController.navigate(Screens.MyFeed.screen) {
+                        popUpTo(Screens.Entry.screen) { inclusive = true }
+                    }
+                } else {
+                    // If sign-in fails, display a message to the user
+                    Log.w("SignIn", "signInWithEmail:failure", task.exception)
+                    firebaseErrorMessage = "Authentication failed"
+                    updateUI(null)
+                }
+            }
+
     }
 
     Column(
@@ -45,22 +77,22 @@ fun SignIn(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // USERNAME
+        // Email
         OutlinedTextField(
-            value = username,
+            value = email,
             onValueChange = {
-                username = it
+                email = it
                 if (it.isNotBlank()) {
-                    usernameError = false
+                    emailError = false
                 }
             },
-            label = { Text("Username") },
-            isError = usernameError,
+            label = { Text("Email") },
+            isError = emailError,
             modifier = Modifier.fillMaxWidth()
         )
-        if (usernameError) {
+        if (emailError) {
             Text(
-                text = "Username is required",
+                text = "Email is required",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -94,6 +126,23 @@ fun SignIn(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Sign In")
+        }
+
+        if (firebaseErrorMessage.isNotEmpty()) {
+            Text(
+                text = firebaseErrorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        // Display user details after successful sign-in
+        if (userDetails.isNotEmpty()) {
+            Text(
+                text = userDetails,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
     }
 }
