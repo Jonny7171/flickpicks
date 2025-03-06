@@ -105,7 +105,7 @@ fun SignUp(navController: NavController) {
             profilePicUrl = null
         )
 
-        // Navigate to the MyFeed screen after successful sign up
+        // Navigate to the User Preferences screen after successful sign up
         navController.navigate(Screens.UserPreferences.screen) {
             popUpTo(Screens.Entry.screen) { inclusive = true }
         }
