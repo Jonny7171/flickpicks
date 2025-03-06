@@ -83,7 +83,7 @@ fun SignUp(navController: NavController) {
                 if (task.isSuccessful) {
                     // Sign-up successful
                     Log.d("SignUp", "createUserWithEmail:success")
-                    navController.navigate(Screens.MyFeed.screen) {
+                    navController.navigate(Screens.UserPreferences.screen) {
                         popUpTo(Screens.Entry.screen) { inclusive = true }
                     }
                 } else {
@@ -106,7 +106,7 @@ fun SignUp(navController: NavController) {
         )
 
         // Navigate to the MyFeed screen after successful sign up
-        navController.navigate(Screens.MyFeed.screen) {
+        navController.navigate(Screens.UserPreferences.screen) {
             popUpTo(Screens.Entry.screen) { inclusive = true }
         }
     }

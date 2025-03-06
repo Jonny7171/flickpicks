@@ -56,6 +56,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -111,17 +112,15 @@ dependencies {
     testImplementation ("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
-  //  testImplementation(libs.mockito.inline)
-  //  testImplementation(libs.mockito.kotlin)
-  //  testImplementation(libs.coroutines.test)
-    // testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-    //testImplementation("org.mockito:mockito-core:5.3.1")
-    //testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
-
-
+    // Ktor Client
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
     // Test Task Configuration for JUnit 5
     tasks.withType<Test> {

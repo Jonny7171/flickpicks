@@ -1,5 +1,6 @@
 package com.example.flickpicks
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,10 +49,13 @@ import com.example.flickpicks.ui.screens.Search
 import com.example.flickpicks.ui.screens.Settings
 import com.example.flickpicks.ui.screens.SignIn
 import com.example.flickpicks.ui.screens.SignUp
+import com.example.flickpicks.ui.screens.UserPreferences
 import com.example.flickpicks.ui.screens.mockReviews
 import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
 import com.example.flickpicks.ui.theme.GreenJC
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import com.example.flickpicks.ui.viewmodels.GenreViewModel
 import com.example.flickpicks.ui.viewmodels.MovieReviewViewModel
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
@@ -59,6 +63,7 @@ import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val userProfileViewModel: UserProfileViewModel by viewModels()
     private val genreViewModel: GenreViewModel by viewModels()
@@ -259,6 +264,9 @@ fun BottomNavigationBar() {
             composable(Screens.MyFeed.screen)  {
                 MyFeed(navController = navigationController)
             }
+            composable(Screens.UserPreferences.screen)  {
+                UserPreferences(navController = navigationController)
+            }
             composable(Screens.Search.screen)  { Search() }
             composable(Screens.Friends.screen) { Friends() }
             composable(Screens.Party.screen)   {
@@ -278,9 +286,9 @@ fun BottomNavigationBar() {
             }
 
             composable(Screens.MovieDetail.screen) { backStackEntry ->
-                val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+                val movieId = backStackEntry.arguments?.getString("movieId")
                 if (movieId != null) {
-                    MovieDetailScreen(movieId, mockReviews, navigationController)
+                    MovieDetailScreen(movieId, navigationController)
                 }
             }
         }
