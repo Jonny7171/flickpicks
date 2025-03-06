@@ -36,6 +36,7 @@ import com.example.flickpicks.data.model.Genre
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.model.PartyGroup
+import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.Entry
 import com.example.flickpicks.ui.screens.Friends
@@ -283,6 +284,11 @@ fun BottomNavigationBar() {
             }
             composable(Screens.PartyGroup.screen) {
                 PartyGroup(navController = navigationController)
+            }
+            composable(Screens.PartyGroupChat.screen) {
+                val sharedViewModel = remember { PartyGroupViewModel() }
+                ChatScreen(navigationController, sharedViewModel)
+
             }
 
             composable(Screens.MovieDetail.screen) { backStackEntry ->
