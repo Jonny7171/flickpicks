@@ -5,6 +5,8 @@ import com.example.flickpicks.data.model.UserProfile
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface UserProfileDatabase {
     suspend fun add(profile: UserProfile): Boolean
@@ -109,8 +111,8 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
     }
 }
 
-
-class UserProfileRepository(private val db: UserProfileDatabase) {
+@Singleton
+class UserProfileRepository @Inject constructor (private val db: UserProfileDatabase) {
 
     suspend fun addUserProfile(userProfile: UserProfile): Boolean {
         return db.add(userProfile)

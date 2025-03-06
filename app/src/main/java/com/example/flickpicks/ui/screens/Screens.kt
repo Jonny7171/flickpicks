@@ -9,10 +9,11 @@ sealed class Screens (val screen: String){
     data object EditProfile: Screens(screen = "editProfile")
     data object Settings: Screens(screen = "settings")
     data object Entry : Screens(screen = "Entry")
+    data object UserPreferences : Screens(screen = "UserPreferences")
     data object SignUp : Screens(screen = "signUp")
     data object SignIn : Screens(screen = "signIn")
     data object PartyGroup: Screens(screen = "partyGroup")
     data object MovieDetail : Screens(screen = "movieDetail/{movieId}") {
-        fun createRoute(movieId: Int) = "movieDetail/$movieId"
+        fun createRoute(movieId: String) = "movieDetail/$movieId"
     }
 }

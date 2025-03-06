@@ -1,8 +1,6 @@
 package com.example.flickpicks
 
 import com.example.flickpicks.data.model.UserProfile
-import com.example.flickpicks.data.repository.MovieReviewInMemoryDatabase
-import com.example.flickpicks.data.repository.MovieReviewRepository
 import com.example.flickpicks.data.repository.UserProfileInMemoryDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
 import kotlinx.coroutines.runBlocking

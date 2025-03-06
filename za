@@ -1,0 +1,9 @@
+  25-shaili-create-database-second-attempt[m 1b599e2 [[34morigin/25-shaili-create-database-second-attempt[m] Fixed PartyGroup model, repository, view model. Tested with Firestore to update the database and added mock tests for unit testing
+  38-add-multi-user-sign-in               [m 80dcdb2 [[34morigin/38-add-multi-user-sign-in[m] Users need to sign in with their email and password
+  4-Jonny-Search-Branch                   [m f47b69f [[34morigin/4-Jonny-Search-Branch[m] Add Login UI to app
+  Jonny-Create-UserObject                 [m e826221 [[34morigin/Jonny-Create-UserObject[m] Updated Profile.kt, SignUp.kt, and the UserProfile Object for user data handling
+  main                                    [m 2c2d7dd [[34morigin/main[m: behind 2] Merge branch '25-shaili-create-database-second-attempt' into 'main'
+  malvika/integrate-api-and-database      [m b5b1857 [[34morigin/malvika/integrate-api-and-database[m] Added TMDB API.
+* [32mmalvika/integrate-api-and-database-Jonny[m b5b1857 Added TMDB API.
+  shaili-add-bottom-navigation            [m 3721d8e [[34morigin/shaili-add-bottom-navigation[m] Added bottom navigation bar in green
+  user-profile-settings-ui                [m 3a2d073 [[34morigin/user-profile-settings-ui[m] created ui for party, user profile, and settings
