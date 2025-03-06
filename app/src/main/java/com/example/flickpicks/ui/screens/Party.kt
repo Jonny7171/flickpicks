@@ -27,7 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.compose.runtime.*
+import androidx.compose.material3.*
 import com.example.flickpicks.data.model.PartyGroup
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 
 val mockGroups = listOf(
     PartyGroup(1, "Charlie's Angels"),
@@ -37,6 +41,11 @@ val mockGroups = listOf(
 
 @Composable
 fun Party(navController: NavController){
+    var userMadeGroups by remember {mutableStateOf(mockGroups.toMutableList())}
+    var newGroupName by remember {mutableStateOf("")}
+    var showDialog by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -48,34 +57,98 @@ fun Party(navController: NavController){
 
             Text(text = "Movie Party", fontSize = 24.sp)
 
-            Button(onClick = {} ,
+            Button(onClick = {},
                 modifier = Modifier.size(40.dp),
                 shape = CircleShape,
 
                 contentPadding = PaddingValues(0.dp)
 
-            ){
-                Text(text = "+", fontSize = 24.sp)
+            ) {
+                Text(text = "+", fontSize = 24.sp, modifier = Modifier.clickable { showDialog = true})
             }
 
         }
+
         Spacer(modifier=Modifier.height(8.dp))
-        ShowGroups(mockGroups, navController)
+        ShowGroups(userMadeGroups, navController, onDelete = { group ->
+            userMadeGroups = userMadeGroups.filter{it.id != group.id }.toMutableStateList()
+        })
+
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Create New Group") },
+                text = {
+                    Column {
+                        TextField(
+                            value = newGroupName,
+                            onValueChange = {
+                                newGroupName = it
+                                showError = false
+                            },
+                            label = { Text("Group Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        if (showError) {
+                            Text("Group name cannot be empty", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(4.dp))
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (newGroupName.isNotBlank()) {
+                                val newGroup = PartyGroup(id = userMadeGroups.size + 1, name = newGroupName)
+                                userMadeGroups = (userMadeGroups + newGroup).toMutableList()
+                                newGroupName = ""
+                                showDialog = false
+                            } else {
+                                showError = true
+                            }
+                        }
+                    ) {
+                        Text("Create")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
+
 
 }
 
 @Composable
-fun ShowGroups(groups: List<PartyGroup>, navController: NavController) {
+fun ShowGroups(groups: List<PartyGroup>, navController: NavController, onDelete: (PartyGroup) -> Unit) {
+    var showDeleteDialog by remember { mutableStateOf<PartyGroup?>(null)}
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.padding(4.dp)
-        ) {
+        LazyColumn(modifier = Modifier.padding(4.dp)) {
             items(groups) { group ->
-                Box(modifier = Modifier.fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable { navController.navigate(Screens.PartyGroup.screen)}
-                    .background(Color.LightGray, shape = RoundedCornerShape(12.dp))) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable { navController.navigate(Screens.PartyGroup.screen)}
+                        .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                    .pointerInput(Unit) {
+
+                        detectTapGestures(
+                            onTap = {
+                                navController.navigate(Screens.PartyGroup.screen)
+                            },
+                            onLongPress = {
+                                showDeleteDialog = group
+                                //onDelete(group)
+                            }
+                        )
+                    }
+
+
+                ){
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -89,17 +162,39 @@ fun ShowGroups(groups: List<PartyGroup>, navController: NavController) {
                             fontSize = 16.sp,
                             modifier = Modifier.weight(1f)
                         )
-                        Button(onClick = { }) {
+                        Button(onClick = { navController.navigate(Screens.PartyGroupChat.screen)} ) {
                             Text(text = "Send Message")
                         }
-
-
 
                     }
 
                 }
 
+
             }
         }
     }
+
+    showDeleteDialog?.let { group ->
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = null },
+            title = { Text("Delete Group") },
+            text = { Text("Are you sure you want to delete \"${group.name}\"?") },
+            confirmButton = {
+                Button(onClick = {
+                    onDelete(group)
+                    showDeleteDialog = null
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = null }) {
+                    Text("Cancel")
+                }
+
+            }
+        )
+    }
 }
+
