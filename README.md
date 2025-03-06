@@ -18,5 +18,5 @@ Deliverables
 
 ## Releases
 - [Version 0.1.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.1.0-Release)
-
+- [Version 0.2.0 Release] (https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.2.0-Release)
 
