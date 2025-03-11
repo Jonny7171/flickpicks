@@ -22,7 +22,7 @@ class PartyGroupRepositoryTest {
 
     @Test
     fun addPartyGroup() = runBlocking {
-        val group = PartyGroup(id = 5, name = "CS Party")
+        val group = PartyGroup(id = 5, groupName = "CS Party")
         val result = repository.addPartyGroup(group)
         Assertions.assertTrue(result)
         Assertions.assertNotNull(mockDb.get(5))
@@ -30,17 +30,17 @@ class PartyGroupRepositoryTest {
 
     @Test
     fun getPartyGroup() = runBlocking{
-        val group = PartyGroup(id = 5, name = "CS Party")
+        val group = PartyGroup(id = 5, groupName = "CS Party")
         mockDb.add(group)
         val result = repository.getPartyGroup(5)
         Assertions.assertNotNull(result)
         Assertions.assertEquals(5, result?.id)
-        Assertions.assertEquals("CS Party", result?.name)
+        Assertions.assertEquals("CS Party", result?.groupName)
     }
 
     @Test
     fun deletePartyGroup() = runBlocking {
-        val group = PartyGroup(id = 5, name = "CS Party")
+        val group = PartyGroup(id = 5, groupName = "CS Party")
         mockDb.add(group)
         val result = repository.deletePartyGroup(5)
         Assertions.assertTrue(result)
@@ -49,9 +49,9 @@ class PartyGroupRepositoryTest {
 
     @Test
     fun updatePartyGroup() = runBlocking {
-        val group = PartyGroup(id = 5, name = "CS Party")
+        val group = PartyGroup(id = 5, groupName = "CS Party")
         mockDb.add(group)
-        val updates = mapOf("name" to "Post Exam Party")
+        val updates = mapOf("groupName" to "Post Exam Party")
         val result = repository.updatePartyGroup(group, updates)
         Assertions.assertTrue(result)
     }

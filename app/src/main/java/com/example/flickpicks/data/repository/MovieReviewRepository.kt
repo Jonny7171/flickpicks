@@ -5,6 +5,7 @@ import com.example.flickpicks.data.model.MovieReview
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 interface MovieReviewDatabase {
     suspend fun add(movieReview: MovieReview): Boolean
@@ -33,6 +34,7 @@ class MovieReviewInMemoryDatabase : MovieReviewDatabase {
         val existingReview = reviews[movieReview.id.toString()] ?: return false
         updates.forEach { (key, value) ->
             when (key) {
+                "movieId" -> existingReview.movieId = value as String
                 "movieTitle" -> existingReview.movieTitle = value as String
                 "release_date" -> existingReview.release_date = value as String
                 "tagline" -> existingReview.tagline = value as String
@@ -104,7 +106,7 @@ class MovieReviewFirestoreDatabase : MovieReviewDatabase {
 
 
 
-class MovieReviewRepository(private val db: MovieReviewDatabase) {
+class MovieReviewRepository @Inject constructor(private val db: MovieReviewDatabase) {
 
     suspend fun addMovieReview(movieReview: MovieReview): Boolean {
         return db.add(movieReview)
