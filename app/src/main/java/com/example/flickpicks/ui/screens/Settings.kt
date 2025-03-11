@@ -74,7 +74,6 @@ fun Settings (navController: NavController) {
         )
         SettingsItem(Icons.Filled.ShoppingCart, "View Saved Movies") { /* add navigation*/}
         SettingsItem(Icons.Filled.Delete, "Clear Search History") { showClearHistoryDialog = true }
-        SettingsItem(Icons.Filled.Refresh, "Clear Watch History") { showClearHistoryDialog = true }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -85,7 +84,7 @@ fun Settings (navController: NavController) {
         if (showClearHistoryDialog) {
             ConfirmationDialog(
                 title = "Clear History",
-                message = "Are you sure you want to clear your search and movie history?",
+                message = "Are you sure you want to clear your search history?",
                 onConfirm = { /* Handle clear history */ showClearHistoryDialog = false },
                 onDismiss = { showClearHistoryDialog = false }
             )

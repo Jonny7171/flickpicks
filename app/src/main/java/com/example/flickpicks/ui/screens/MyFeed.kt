@@ -1,6 +1,8 @@
 package com.example.flickpicks.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -219,7 +220,17 @@ fun FeedScreen(navController: NavController, reviews: List<MovieReview>) {
 }
 
 @Composable
-fun TrendingMovieItem(movie: Movie, onClick: () -> Unit) {
+fun TrendingMovieItem(
+    movie: Movie, onClick: () -> Unit,
+    viewModel: MyFeedViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    var trailer: String? = null
+
+    LaunchedEffect(Unit) {
+        trailer = viewModel.getTrailer(movie.id)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,12 +265,6 @@ fun TrendingMovieItem(movie: Movie, onClick: () -> Unit) {
         ) {
             IconButton(onClick = { }) {
                 Icon(
-                    Icons.Default.Favorite,
-                    contentDescription = "Love"
-                )
-            }
-            IconButton(onClick = { }) {
-                Icon(
                     Icons.Default.ThumbUp,
                     contentDescription = "Like"
                 )
@@ -276,14 +281,31 @@ fun TrendingMovieItem(movie: Movie, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = { }) { Text("Save") }
-                TextButton(onClick = { }) { Text("Watch Now") }
+                TextButton(
+                    onClick = {
+                        trailer?.let {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                            context.startActivity(intent)
+                        }
+                    }
+                ) { Text("Watch Trailer") }
             }
         }
     }
 }
 
 @Composable
-fun MovieItem(movie: MovieReview, onClick: () -> Unit) {
+fun MovieItem(
+    movie: MovieReview, onClick: () -> Unit,
+    viewModel: MyFeedViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    var trailer: String? = null
+
+    LaunchedEffect(Unit) {
+       trailer = viewModel.getTrailer(movie.movieId)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -318,12 +340,6 @@ fun MovieItem(movie: MovieReview, onClick: () -> Unit) {
         ) {
             IconButton(onClick = { }) {
                 Icon(
-                    Icons.Default.Favorite,
-                    contentDescription = "Love"
-                )
-            }
-            IconButton(onClick = { }) {
-                Icon(
                     Icons.Default.ThumbUp,
                     contentDescription = "Like"
                 )
@@ -340,7 +356,14 @@ fun MovieItem(movie: MovieReview, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = { }) { Text("Save") }
-                TextButton(onClick = { }) { Text("Watch Now") }
+                TextButton(
+                    onClick = {
+                        trailer?.let {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                            context.startActivity(intent)
+                        }
+                    }
+                ) { Text("Watch Trailer") }
             }
         }
     }

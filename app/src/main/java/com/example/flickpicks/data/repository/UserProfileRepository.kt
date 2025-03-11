@@ -1,6 +1,8 @@
 package com.example.flickpicks.data.repository
 
 import android.util.Log
+import com.example.flickpicks.data.model.MovieReview
+import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.model.UserProfile
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -32,24 +34,26 @@ class UserProfileInMemoryDatabase : UserProfileDatabase {
     }
 
     override suspend fun update(profile: UserProfile, updates: Map<String, Any>): Boolean {
-        val existingReview = profiles[profile.id.toString()] ?: return false
+        val existingProfile = profiles[profile.id.toString()] ?: return false
         updates.forEach { (key, value) ->
             when (key) {
-                "name" -> existingReview.name = value as String
-                "username" -> existingReview.userName = value as String
-                "password" -> existingReview.password = value as String
-                "email" -> existingReview.email = value as String
-                "phoneNumber" -> existingReview.phoneNumber = value as String
-                "friends" -> existingReview.friends = value as MutableList<String>
-                "blockedUsers" -> existingReview.blockedUsers = value as MutableList<String>
-                "incomingPendingFriends" -> existingReview.incomingPendingFriends = value as MutableList<String>
-                "outgoingPendingFriends" -> existingReview.outgoingPendingFriends = value as MutableList<String>
-                "moviesWatched" -> existingReview.moviesWatched = value as MutableList<String>
-                "moviesRated" -> existingReview.moviesRated = value as MutableList<String>
-                "moviesReviewed" -> existingReview.moviesReviewed = value as MutableList<String>
-                "moviesLiked" -> existingReview.moviesLiked = value as MutableList<String>
-                "moviesDisliked" -> existingReview.moviesDisliked = value as MutableList<String>
-                "moviesPreferences" -> existingReview.moviesPreferences = value as MutableList<String>
+                "name" -> existingProfile.name = value as String
+                "profilePicUrl" -> existingProfile.profilePicUrl = value as String
+                "username" -> existingProfile.userName = value as String
+                "password" -> existingProfile.password = value as String
+                "email" -> existingProfile.email = value as String
+                "phoneNumber" -> existingProfile.phoneNumber = value as String
+                "following" -> existingProfile.following = value as MutableList<Pair<String, String>>
+                "followers" -> existingProfile.followers = value as MutableList<Pair<String, String>>
+                "blockedUsers" -> existingProfile.blockedUsers = value as MutableList<String>
+                "incomingRequests" -> existingProfile.incomingRequests = value as MutableList<String>
+                "outgoingRequests" -> existingProfile.outgoingRequests = value as MutableList<String>
+                "moviesSaved" -> existingProfile.moviesSaved = value as MutableList<String>
+                "moviesReviewed" -> existingProfile.moviesReviewed = value as MutableList<MovieReview>
+                "moviesLiked" -> existingProfile.moviesLiked = value as MutableList<String>
+                "moviesDisliked" -> existingProfile.moviesDisliked = value as MutableList<String>
+                "genrePreferences" -> existingProfile.genrePreferences = value as MutableList<String>
+                "partyGroups" -> existingProfile.partyGroups = value as MutableList<PartyGroup>
             }
         }
         return true
@@ -112,7 +116,7 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
 }
 
 @Singleton
-class UserProfileRepository @Inject constructor (private val db: UserProfileDatabase) {
+class UserProfileRepository @Inject constructor(private val db: UserProfileDatabase) {
 
     suspend fun addUserProfile(userProfile: UserProfile): Boolean {
         return db.add(userProfile)

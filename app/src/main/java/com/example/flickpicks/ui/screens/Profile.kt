@@ -5,16 +5,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -24,20 +26,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.flickpicks.data.model.UserProfile
-import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.viewmodels.MainViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 
 @Composable
 fun Profile(navController: NavController) {
@@ -62,158 +60,174 @@ fun Profile(navController: NavController) {
         return
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Bar with Settings Icon
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "My Profile",
-                style = MaterialTheme.typography.headlineMedium
+        item {
+            // Top Bar with Settings Icon
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "My Profile",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                IconButton(onClick = { navController.navigate(Screens.Settings.screen) }) {
+                    Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            // Profile Picture
+            val profilePicUrl = currentUser.profilePicUrl ?: ""
+            Image(
+                painter = if (profilePicUrl.isNotBlank())
+                    rememberAsyncImagePainter(profilePicUrl)
+                else
+                    rememberAsyncImagePainter("https://via.placeholder.com/150"), // Placeholder image
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
             )
-            IconButton(onClick = { navController.navigate(Screens.Settings.screen) }) {
-                Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Display the User's Name
+            Text(
+                text = displayField(currentUser.name),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = { navController.navigate(Screens.EditProfile.screen) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text(text = "Edit Profile", color = Color.White)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            // Additional User Information
+            Text(
+                text = "Email: ${displayField(currentUser.email)}",
+                fontSize = 16.sp,
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "Phone: ${displayField(currentUser.phoneNumber)}",
+                fontSize = 16.sp,
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "Username: ${displayField(currentUser.userName)}",
+                fontSize = 16.sp,
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            // Movie Preferences Section
+            Text(
+                text = "Movie Preferences",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (currentUser.genrePreferences.isEmpty()) {
+                Text("Add information to have it show here", color = Color.Gray)
+            } else {
+                PreferencesList(currentUser.genrePreferences)
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Profile Picture
-        val profilePicUrl = currentUser.profilePicUrl ?: ""
-        Image(
-            painter = if (profilePicUrl.isNotBlank())
-                rememberAsyncImagePainter(profilePicUrl)
-            else
-                rememberAsyncImagePainter("https://via.placeholder.com/150"), // Placeholder image
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-                .background(Color.LightGray)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Display the User's Name
-        Text(
-            text = displayField(currentUser.name),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = { navController.navigate(Screens.EditProfile.screen) },
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-        ) {
-            Text(text = "Edit Profile", color = Color.White)
+        item {
+            // Watch History Section
+            Text(
+                text = "Saved Movies",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (currentUser.moviesSaved.isEmpty()) {
+                Text("Add information to have it show here", color = Color.Gray)
+            } else {
+                MovieList(currentUser.moviesSaved)
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Additional User Information
-        Text(
-            text = "Email: ${displayField(currentUser.email)}",
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = "Phone: ${displayField(currentUser.phoneNumber)}",
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = "Username: ${displayField(currentUser.userName)}",
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Movie Preferences Section
-        Text(
-            text = "Movie Preferences",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-        if (currentUser.moviesPreferences.isEmpty()) {
-            Text("Add information to have it show here", color = Color.Gray)
-        } else {
-            PreferencesList(currentUser.moviesPreferences)
+        item {
+            // Ratings & Reviews Section
+            Text(
+                text = "Ratings & Reviews",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (currentUser.moviesReviewed.isEmpty()) {
+                Text("Add information to have it show here", color = Color.Gray)
+            } else {
+                RatingsList(listOf("No ratings available"))
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Watch History Section
-        Text(
-            text = "Watch History",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-        if (currentUser.moviesWatched.isEmpty()) {
-            Text("Add information to have it show here", color = Color.Gray)
-        } else {
-            MovieList(currentUser.moviesWatched)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Ratings & Reviews Section
-        Text(
-            text = "Ratings & Reviews",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-        if (currentUser.moviesReviewed.isEmpty()) {
-            Text("Add information to have it show here", color = Color.Gray)
-        } else {
-            RatingsList(listOf("No ratings available"))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
         // Wish List Section (using moviesLiked as a stand-in)
-        Text(
-            text = "Wish List",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-        if (currentUser.moviesLiked.isEmpty()) {
-            Text("Add information to have it show here", color = Color.Gray)
-        } else {
-            MovieList(currentUser.moviesLiked)
-        }
+//        Text(
+//            text = "Wish List",
+//            fontSize = 18.sp,
+//            fontWeight = FontWeight.Bold,
+//            color = Color.Black,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(vertical = 8.dp)
+//        )
+//        if (currentUser.moviesLiked.isEmpty()) {
+//            Text("Add information to have it show here", color = Color.Gray)
+//        } else {
+//            MovieList(currentUser.moviesLiked)
+//        }
     }
 }
 

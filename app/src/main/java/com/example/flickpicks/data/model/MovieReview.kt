@@ -1,7 +1,5 @@
 package com.example.flickpicks.data.model
 
-import kotlinx.serialization.Serializable
-
 data class MovieReview(
     var id: Int = 0,
     var movieId: String = "",
