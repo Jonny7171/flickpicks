@@ -29,9 +29,7 @@ class MoviesSource {
         return try {
             val fullUrl = "https://api.themoviedb.org/3/trending/movie/week?api_key=2a3ee3402420a1a53993248b0bfbe408"
             val response: JsonObject = client.get(fullUrl).body()
-
             println("API RESPONSE: $response")
-
             response["results"]?.jsonArray?.map { jsonElement ->
                 val obj = jsonElement.jsonObject
                 Movie(

@@ -21,18 +21,19 @@ import com.example.flickpicks.ui.viewmodels.MainViewModel
 fun UserPreferences(
     navController: NavController
 ) {
-    // Get MainViewModel instance
     val mainViewModel = viewModel<MainViewModel>(
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
 
-    //List of genres
-    val commonGenres = listOf("Action", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller")
+    val commonGenres = listOf(
+        "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
+        "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery",
+        "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
+    )
 
     // Track which genres are selected
     val selectedGenres = remember { mutableStateListOf<String>() }
 
-    // For displaying an error if the user tries to proceed with fewer than 2 genres
     var errorMessage by remember { mutableStateOf("") }
 
     fun finalizePreferences() {
@@ -41,10 +42,10 @@ fun UserPreferences(
             errorMessage = "Please select at least 2 genres."
             return
         }
-        // Add them to the user in the db
+        // Save preferences to your backend
         mainViewModel.addPreferencesToCurrentUser(selectedGenres)
 
-        // Navigate to MyFeed after saving preferences
+        // Navigate to the feed after saving
         navController.navigate(Screens.MyFeed.screen) {
             popUpTo(Screens.Entry.screen) { inclusive = true }
         }
@@ -61,43 +62,45 @@ fun UserPreferences(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // List all common genres with a checkbox
+        // --- UPDATED SECTION: 2-column layout via chunked list ---
+        val chunkedGenres = commonGenres.chunked(2)
         LazyColumn {
-            items(commonGenres) { genre ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            if (selectedGenres.contains(genre)) {
-                                selectedGenres.remove(genre)
-                            } else {
-                                selectedGenres.add(genre)
-                            }
+            items(chunkedGenres) { genreRow ->
+                Row {
+                    for (genre in genreRow) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f) // each genre takes equal width in the row
+                                .clickable {
+                                    if (selectedGenres.contains(genre)) {
+                                        selectedGenres.remove(genre)
+                                    } else {
+                                        selectedGenres.add(genre)
+                                    }
+                                }
+                                .padding(8.dp)
+                        ) {
+                            val isChecked = selectedGenres.contains(genre)
+                            Checkbox(
+                                checked = isChecked,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        selectedGenres.add(genre)
+                                    } else {
+                                        selectedGenres.remove(genre)
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = genre)
                         }
-                        .padding(8.dp),
-                    // Keep checkboxes vertically centered
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    val isChecked = selectedGenres.contains(genre)
-                    Checkbox(
-                        checked = isChecked,
-                        onCheckedChange = { checked ->
-                            if (checked) {
-                                selectedGenres.add(genre)
-                            } else {
-                                selectedGenres.remove(genre)
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = genre)
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        //Error
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
@@ -106,7 +109,6 @@ fun UserPreferences(
             )
         }
 
-        // Button to confirm preferences
         Button(
             onClick = { finalizePreferences() },
             modifier = Modifier.fillMaxWidth()
