@@ -92,7 +92,7 @@ fun MovieDetailScreen(
                     Text(text = "Released: ${selectedMovie!!.release_date}", style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { }, modifier = Modifier.fillMaxWidth()) {
-                        Text(text = "Watch Now")
+                        Text(text = "Watch Trailer")
                     }
                 }
             }

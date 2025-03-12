@@ -1,6 +1,5 @@
 package com.example.flickpicks
 
-import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,9 +32,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.flickpicks.data.model.Genre
+import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.MovieReview
-import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.model.PartyGroup
+import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.Entry
@@ -51,18 +51,16 @@ import com.example.flickpicks.ui.screens.Settings
 import com.example.flickpicks.ui.screens.SignIn
 import com.example.flickpicks.ui.screens.SignUp
 import com.example.flickpicks.ui.screens.UserPreferences
-import com.example.flickpicks.ui.screens.mockReviews
 import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
 import com.example.flickpicks.ui.theme.GreenJC
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
 import com.example.flickpicks.ui.viewmodels.GenreViewModel
 import com.example.flickpicks.ui.viewmodels.MovieReviewViewModel
-import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -87,7 +85,25 @@ class MainActivity : ComponentActivity() {
         val sampleGenre = Genre(name = "Sad", count = 6)
 
         val samplePartyGroup =
-            PartyGroup(id = 5, name = "CS Party")
+            PartyGroup(
+                id = 5,
+                groupName = "CS Party",
+                members = mutableListOf(), // Empty list as placeholder
+                timesAvailable = mutableMapOf(), // Empty map as placeholder
+                winnerMovie = Movie( // Provide a sample Movie object
+                    id = "1",
+                    title = "Inception",
+                    release_date = "2010-07-16",
+                    overview = "A mind-bending thriller about dream invasion.",
+                    tagline = "Your mind is the scene of the crime.",
+                    genres = listOf("Sci-Fi", "Thriller"),
+                    poster_path = "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+                    vote_average = "8.8",
+                    trailer = "https://www.youtube.com/watch?v=YoHD9XEInc0"
+                ),
+                pastWatchedMovies = mutableListOf("The Dark Knight"),
+                chatMessages = mutableListOf()
+            )
 
         val sampleReview = MovieReview(
             id = 104,
@@ -153,11 +169,19 @@ class MainActivity : ComponentActivity() {
 fun BottomNavigationBar() {
     val navigationController = rememberNavController()
     val context = LocalContext.current.applicationContext
-    val selected = remember{ mutableStateOf(Icons.Default.Menu)
-    }
+    val selected = remember{ mutableStateOf(Icons.Default.Menu) }
     val currentBackStackEntry = navigationController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry.value?.destination?.route
     val shouldShowBottomBar = currentRoute != Screens.Entry.screen && currentRoute != Screens.SignUp.screen && currentRoute != Screens.SignIn.screen
+
+    when (currentRoute) {
+        Screens.Search.screen -> selected.value = Icons.Default.Search
+        Screens.Friends.screen -> selected.value = Icons.Default.Face
+        Screens.MyFeed.screen -> selected.value = Icons.Default.Menu
+        Screens.Party.screen -> selected.value = Icons.Default.Person
+        Screens.Profile.screen -> selected.value = Icons.Default.AccountBox
+    }
+
     Scaffold (
         bottomBar = {
             if (shouldShowBottomBar) {

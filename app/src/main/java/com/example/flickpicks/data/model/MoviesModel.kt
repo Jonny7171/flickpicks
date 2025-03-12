@@ -12,5 +12,6 @@ data class Movie (
     val genres: List<String>,
     val poster_path: String,
     val vote_average: String,
+    val trailer: String?
 )
 

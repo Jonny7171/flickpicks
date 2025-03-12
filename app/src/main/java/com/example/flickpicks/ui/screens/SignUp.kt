@@ -1,7 +1,6 @@
 package com.example.flickpicks.ui.screens
 
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.viewmodels.MainViewModel
 import com.google.firebase.auth.FirebaseAuth
 

@@ -18,4 +18,8 @@ class MoviesRepository @Inject constructor(
     suspend fun getMoviesByGenres(
         genreIds: List<String>
     ): List<Movie> = moviesSource.getMoviesByGenres(genreIds)
+
+    suspend fun getMovieTrailer(
+        movieId: String
+    ) : String? = moviesSource.getMovieTrailer(movieId)
 }

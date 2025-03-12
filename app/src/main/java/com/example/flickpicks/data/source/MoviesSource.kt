@@ -41,6 +41,7 @@ class MoviesSource {
                     genres = emptyList(), // Fetch genre separately if needed
                     poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                     vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
+                    trailer = null
                 )
             } ?: emptyList()
         } catch (e: Exception) {
@@ -55,6 +56,8 @@ class MoviesSource {
                 parameter("api_key", TMDB_API_KEY)
             }.body()
 
+            val trailer = getMovieTrailer(movieId)
+
             Movie(
                 id = obj["id"]?.jsonPrimitive?.content ?: "",
                 title = obj["title"]?.jsonPrimitive?.content ?: "",
@@ -64,6 +67,7 @@ class MoviesSource {
                 genres = obj["genres"]?.jsonArray?.map { it.jsonObject["name"]?.jsonPrimitive?.content ?: "" } ?: emptyList(),
                 poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                 vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
+                trailer = trailer
             )
         } catch (e: Exception) {
             println("Error fetching movie details: ${e.localizedMessage}")
@@ -111,11 +115,36 @@ class MoviesSource {
                     genres = emptyList(), // Fetch genre separately if needed
                     poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                     vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
+                    trailer = null
                 )
             } ?: emptyList()
         } catch (e: Exception) {
             println("Error fetching movies by genres: ${e.localizedMessage}")
             emptyList()
+        }
+    }
+
+    suspend fun getMovieTrailer(movieId: String): String? {
+        val url = "$TMDB_BASE_URL/movie/$movieId/videos?api_key=$TMDB_API_KEY"
+
+        return try {
+            val response: JsonObject = client.get(url).body()
+            val results = response["results"]?.jsonArray ?: return null
+
+            // Filter for the official trailer on YouTube
+            val trailer = results.firstOrNull { video ->
+                val obj = video.jsonObject
+                obj["site"]?.jsonPrimitive?.content == "YouTube" &&
+                        obj["type"]?.jsonPrimitive?.content == "Trailer"
+            }
+
+            // Return the YouTube key if a trailer is found
+            trailer?.jsonObject?.get("key")?.jsonPrimitive?.content?.let { key ->
+                "https://www.youtube.com/watch?v=$key"
+            }
+        } catch (e: Exception) {
+            println("Error fetching movie trailer: ${e.localizedMessage}")
+            null
         }
     }
 

@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 interface GenreDatabase {
     suspend fun add(genre: Genre): Boolean
@@ -94,7 +95,7 @@ class GenreFirestoreDatabase : GenreDatabase {
     }
 }
 
-class GenreRepository(private val db: GenreDatabase) {
+class GenreRepository @Inject constructor(private val db: GenreDatabase) {
 
     suspend fun addGenre(genre: Genre): Boolean {
         return db.add(genre)

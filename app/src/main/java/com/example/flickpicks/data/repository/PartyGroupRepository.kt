@@ -1,10 +1,14 @@
 package com.example.flickpicks.data.repository
 
 import android.util.Log
+import com.example.flickpicks.data.model.ChatMessage
+import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.PartyGroup
+import com.example.flickpicks.data.model.UserProfile
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 interface PartyGroupDatabase {
     suspend fun add(group: PartyGroup): Boolean
@@ -34,7 +38,12 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         updates.forEach { (key, value) ->
             when (key) {
                 "id" -> group.id = value as Int
-                "name" -> group.name = value as String
+                "name" -> group.groupName = value as String
+                "members" -> group.members = value as MutableList<UserProfile>
+                "timesAvailable" -> group.timesAvailable = value as MutableMap<Pair<String, String>, Int>
+                "winnerMovie" -> group.winnerMovie = value as Movie
+                "pastWatchedMovies" -> group.pastWatchedMovies = value as MutableList<String>
+                "chatMessages" -> group.chatMessages = value as MutableList<ChatMessage>
             }
         }
         return true
@@ -50,7 +59,7 @@ class PartyGroupFirestoreDatabase : PartyGroupDatabase {
     override suspend fun add(group: PartyGroup): Boolean {
         return try {
             db.collection("party_groups").document(group.id.toString()).set(group).await()
-            Log.d("Firestore", "Party group added for: ${group.name}")
+            Log.d("Firestore", "Party group added for: ${group.groupName}")
             true
         } catch (e: Exception) {
             Log.e("Firestore", "Error adding party group", e)
@@ -96,7 +105,7 @@ class PartyGroupFirestoreDatabase : PartyGroupDatabase {
     }
 }
 
-class PartyGroupRepository(private val db: PartyGroupDatabase) {
+class PartyGroupRepository @Inject constructor(private val db: PartyGroupDatabase) {
 
     suspend fun addPartyGroup(group: PartyGroup): Boolean {
         return db.add(group)

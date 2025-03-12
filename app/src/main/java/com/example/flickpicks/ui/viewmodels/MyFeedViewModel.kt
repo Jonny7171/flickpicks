@@ -42,11 +42,11 @@ class MyFeedViewModel @Inject constructor(
     fun fetchReviewedByFriends(userId: Int) {
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
-            val friends = userProfile?.friends ?: emptyList()
+            val friends = userProfile?.following ?: emptyList()
 
             val friendReviews = mutableListOf<MovieReview>()
             for (friendId in friends) {
-                val friendProfile = userRepository.getUserProfile(friendId.toInt())
+                val friendProfile = userRepository.getUserProfile(friendId.first.toInt())
                 friendProfile?.moviesReviewed?.forEach { review ->
 //                    friendReviews.add(review)
                 }
@@ -60,7 +60,7 @@ class MyFeedViewModel @Inject constructor(
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
             // moviesPreferences should be genrePreferences
-            val preferredGenres = userProfile?.moviesPreferences ?: emptyList()
+            val preferredGenres = userProfile?.genrePreferences ?: emptyList()
 
             if (preferredGenres.isNotEmpty()) {
                 val recommendedMovies = repository.getMoviesByGenres(preferredGenres)
@@ -75,6 +75,10 @@ class MyFeedViewModel @Inject constructor(
 
     suspend fun fetchWatchProviders(movieId: String) {
         _watchProviders.value = repository.getMovieWatchProviders(movieId)
+    }
+
+    suspend fun getTrailer(movieId: String): String? {
+        return repository.getMovieTrailer(movieId)
     }
 }
 

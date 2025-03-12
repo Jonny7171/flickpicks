@@ -63,8 +63,8 @@ class MainViewModel : ViewModel() {
     fun addPreferencesToCurrentUser(genres: List<String>) {
         currentUser?.let { user ->
             // Clear existing preferences and add new ones
-            user.moviesPreferences.clear()
-            user.moviesPreferences.addAll(genres)
+            user.genrePreferences.clear()
+            user.genrePreferences.addAll(genres)
         }
     }
 
