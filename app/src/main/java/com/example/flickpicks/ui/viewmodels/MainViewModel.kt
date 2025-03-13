@@ -43,7 +43,7 @@ class MainViewModel : ViewModel() {
         profilePicUrl: String? = null
     ) {
         val newUser = UserProfile(
-            id = generateUserId(),
+            //id = generateUserId(),
             name = name,
             userName = userName,
             password = password,

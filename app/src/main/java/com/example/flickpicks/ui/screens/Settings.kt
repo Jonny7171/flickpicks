@@ -14,14 +14,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 @Composable
-fun Settings (navController: NavController) {
+fun Settings
+            (navController: NavController,
+             userProfileViewModel: UserProfileViewModel = hiltViewModel()
+) {
     var isDarkMode by remember {mutableStateOf(false)}
     var notificationsEnabled by remember {mutableStateOf(true)}
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showLogOutDialog by remember { mutableStateOf(false) }
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+
+    // Fetch user profile when screen is loaded
+    LaunchedEffect(userId) {
+        userId?.let { userProfileViewModel.fetchUserProfile(it) }
+    }
+    val currentUser by userProfileViewModel.userProfile
+
+    if (userId == null || currentUser == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("No settings found. Please sign up.")
+        }
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,8 +70,9 @@ fun Settings (navController: NavController) {
                 .padding(vertical = 8.dp)
         )
         SettingsItem(Icons.Filled.AccountCircle, "Profile Visibility") {/* add navigation*/ }
-        SettingsItem(Icons.Filled.Warning, "View Blocked Users") {/* add navigation*/ }
-
+        SettingsItem(Icons.Filled.Warning, "View Blocked Users") {
+            navController.navigate(Screens.BlockedUsers.screen)
+        }
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         // App Preferences
@@ -72,7 +101,10 @@ fun Settings (navController: NavController) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
-        SettingsItem(Icons.Filled.ShoppingCart, "View Saved Movies") { /* add navigation*/}
+        SettingsItem(Icons.Filled.ShoppingCart, "View Saved Movies") {
+            navController.navigate(Screens.SavedMovies.screen)
+
+        }
         SettingsItem(Icons.Filled.Delete, "Clear Search History") { showClearHistoryDialog = true }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -94,7 +126,10 @@ fun Settings (navController: NavController) {
             ConfirmationDialog(
                 title = "Log Out",
                 message = "Are you sure you want to log out?",
-                onConfirm = { /* Handle logout */ navController.navigate(Screens.Entry.screen)},
+                onConfirm = {
+                    Firebase.auth.signOut()
+                    navController.navigate(Screens.Entry.screen)
+                            },
                 onDismiss = { showLogOutDialog = false }
             )
         }

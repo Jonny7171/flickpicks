@@ -14,6 +14,8 @@ sealed class Screens (val screen: String){
     data object SignIn : Screens(screen = "signIn")
     data object PartyGroup: Screens(screen = "partyGroup")
     data object PartyGroupChat: Screens(screen = "groupChat")
+    data object BlockedUsers: Screens(screen="blockedUsers")
+    data object SavedMovies: Screens(screen="savedMovies")
 
     data object MovieDetail : Screens(screen = "movieDetail/{movieId}") {
         fun createRoute(movieId: String) = "movieDetail/$movieId"

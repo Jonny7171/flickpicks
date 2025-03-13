@@ -149,5 +149,28 @@ class MoviesSource {
             null
         }
     }
+    suspend fun getListofGenres(movieId: String): String? {
+        val url = "$TMDB_BASE_URL/movie/$movieId/videos?api_key=$TMDB_API_KEY"
+
+        return try {
+            val response: JsonObject = client.get(url).body()
+            val results = response["results"]?.jsonArray ?: return null
+
+            // Filter for the official trailer on YouTube
+            val trailer = results.firstOrNull { video ->
+                val obj = video.jsonObject
+                obj["site"]?.jsonPrimitive?.content == "YouTube" &&
+                        obj["type"]?.jsonPrimitive?.content == "Trailer"
+            }
+
+            // Return the YouTube key if a trailer is found
+            trailer?.jsonObject?.get("key")?.jsonPrimitive?.content?.let { key ->
+                "https://www.youtube.com/watch?v=$key"
+            }
+        } catch (e: Exception) {
+            println("Error fetching movie trailer: ${e.localizedMessage}")
+            null
+        }
+    }
 
 }

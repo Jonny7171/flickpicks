@@ -1,5 +1,6 @@
 package com.example.flickpicks.ui.screens
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,14 +16,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.flickpicks.ui.viewmodels.MainViewModel
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun UserPreferences(
     navController: NavController
 ) {
     // Get MainViewModel instance
-    val mainViewModel = viewModel<MainViewModel>(
+    val userProfileViewModel = viewModel<UserProfileViewModel>(
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
 
@@ -41,12 +43,22 @@ fun UserPreferences(
             errorMessage = "Please select at least 2 genres."
             return
         }
-        // Add them to the user in the db
-        mainViewModel.addPreferencesToCurrentUser(selectedGenres)
 
-        // Navigate to MyFeed after saving preferences
-        navController.navigate(Screens.MyFeed.screen) {
-            popUpTo(Screens.Entry.screen) { inclusive = true }
+        val auth = FirebaseAuth.getInstance()
+        val userId = auth.currentUser?.uid
+
+        if (userId == null) {
+            errorMessage = "You must be logged in to select preferences"
+            return
+        }
+        val userProfile = userProfileViewModel.getUserProfile(userId)
+        Log.d("Firestore", "${userProfile}")
+
+        userProfile.let {
+            userProfileViewModel.updateUserProfile(userId, mapOf("genrePreferences" to selectedGenres))
+            navController.navigate(Screens.MyFeed.screen) {
+                popUpTo(Screens.Entry.screen) { inclusive = true }
+            }
         }
     }
 

@@ -12,7 +12,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 class MoviesRepositoryTest {
-
     @Mock
     private lateinit var moviesSource: MoviesSource
 
@@ -28,8 +27,8 @@ class MoviesRepositoryTest {
     fun getTrendingMovies() = runBlocking {
         // Mock data
         val movies = listOf(
-            Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5"),
-            Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0")
+            Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url"),
+            Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0", "url")
         )
 
         // Mock API response
@@ -47,7 +46,7 @@ class MoviesRepositoryTest {
     @Test
     fun getMovieDetails() = runBlocking {
         // Mock data
-        val movie = Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5")
+        val movie = Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url")
 
         // Mock API response
         `when`(moviesSource.getMovieDetails("1")).thenReturn(movie)
@@ -83,8 +82,8 @@ class MoviesRepositoryTest {
     fun getMoviesByGenres() = runBlocking {
         // Mock data
         val movies = listOf(
-            Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5"),
-            Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0")
+            Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url"),
+            Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0", "url")
         )
 
         // Mock API response

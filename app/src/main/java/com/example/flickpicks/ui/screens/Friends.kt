@@ -34,20 +34,20 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.data.model.UserProfile
 
 val followingList = listOf(
-    UserProfile(1, "Alice Johnson", "https://via.placeholder.com/150"),
-    UserProfile(2, "Bob Smith", "https://via.placeholder.com/150"),
-    UserProfile(3, "Charlie Brown", "https://via.placeholder.com/150")
+    UserProfile("1", "Alice Johnson", "https://via.placeholder.com/150"),
+    UserProfile("2", "Bob Smith", "https://via.placeholder.com/150"),
+    UserProfile("3", "Charlie Brown", "https://via.placeholder.com/150")
 )
 
 val followersList = listOf(
-    UserProfile(4, "David Miller", "https://via.placeholder.com/150"),
-    UserProfile(5, "Emma Wilson", "https://via.placeholder.com/150"),
-    UserProfile(6, "Frankie Thomas", "https://via.placeholder.com/150")
+    UserProfile("4", "David Miller", "https://via.placeholder.com/150"),
+    UserProfile("5", "Emma Wilson", "https://via.placeholder.com/150"),
+    UserProfile("6", "Frankie Thomas", "https://via.placeholder.com/150")
 )
 
 val friendRequests = listOf(
-    UserProfile(7, "Grace Lee", "https://via.placeholder.com/150"),
-    UserProfile(8, "Henry Carter", "https://via.placeholder.com/150")
+    UserProfile("7", "Grace Lee", "https://via.placeholder.com/150"),
+    UserProfile("8", "Henry Carter", "https://via.placeholder.com/150")
 )
 
 

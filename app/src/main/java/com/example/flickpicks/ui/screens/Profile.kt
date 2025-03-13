@@ -1,6 +1,6 @@
+
 package com.example.flickpicks.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,32 +24,39 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.flickpicks.ui.viewmodels.MainViewModel
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
+
 
 @Composable
-fun Profile(navController: NavController) {
-    val mainViewModel = viewModel<MainViewModel>(
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-    val currentUser = mainViewModel.getCurrentUser() // Assumes getCurrentUser() is implemented in MainViewModel
+fun Profile(
+    navController: NavController,
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+) {
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
 
-    // Helper function to display a field or a default message if empty
-    fun displayField(field: String): String =
-        if (field.isBlank()) "Add information to have it show here" else field
+    // Fetch user profile when screen is loaded
+    LaunchedEffect(userId) {
+        userId?.let { userProfileViewModel.fetchUserProfile(it) }
+    }
 
-    // If no user data is found, show a placeholder message
-    if (currentUser == null) {
+    val currentUser by userProfileViewModel.userProfile
+
+    // If user is not logged in
+    if (userId == null || currentUser == null) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -89,7 +96,7 @@ fun Profile(navController: NavController) {
 
         item {
             // Profile Picture
-            val profilePicUrl = currentUser.profilePicUrl ?: ""
+            val profilePicUrl = currentUser?.profilePicUrl ?: ""
             Image(
                 painter = if (profilePicUrl.isNotBlank())
                     rememberAsyncImagePainter(profilePicUrl)
@@ -106,7 +113,7 @@ fun Profile(navController: NavController) {
 
             // Display the User's Name
             Text(
-                text = displayField(currentUser.name),
+                text = currentUser?.name ?: "Add your name",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -132,19 +139,19 @@ fun Profile(navController: NavController) {
         item {
             // Additional User Information
             Text(
-                text = "Email: ${displayField(currentUser.email)}",
+                text = "Email: ${currentUser?.email ?: "Not provided"}",
                 fontSize = 16.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = "Phone: ${displayField(currentUser.phoneNumber)}",
+                text = "Phone: ${currentUser?.phoneNumber ?: "Not provided"}",
                 fontSize = 16.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = "Username: ${displayField(currentUser.userName)}",
+                text = "Username: ${currentUser?.userName ?: "Not provided"}",
                 fontSize = 16.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth()
@@ -164,10 +171,10 @@ fun Profile(navController: NavController) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
-            if (currentUser.genrePreferences.isEmpty()) {
-                Text("Add information to have it show here", color = Color.Gray)
+            if (currentUser?.genrePreferences.isNullOrEmpty()) {
+                Text("No preferences selected", color = Color.Gray)
             } else {
-                PreferencesList(currentUser.genrePreferences)
+                PreferencesList(currentUser!!.genrePreferences)
             }
         }
 
@@ -184,10 +191,10 @@ fun Profile(navController: NavController) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
-            if (currentUser.moviesSaved.isEmpty()) {
-                Text("Add information to have it show here", color = Color.Gray)
+            if (currentUser?.moviesSaved.isNullOrEmpty()) {
+                Text("No saved movies", color = Color.Gray)
             } else {
-                MovieList(currentUser.moviesSaved)
+                MovieList(currentUser!!.moviesSaved)
             }
         }
 
@@ -204,30 +211,14 @@ fun Profile(navController: NavController) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
-            if (currentUser.moviesReviewed.isEmpty()) {
-                Text("Add information to have it show here", color = Color.Gray)
+            if (currentUser?.moviesReviewed.isNullOrEmpty()) {
+                Text("No reviews available", color = Color.Gray)
             } else {
                 RatingsList(listOf("No ratings available"))
             }
         }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
-
-        // Wish List Section (using moviesLiked as a stand-in)
-//        Text(
-//            text = "Wish List",
-//            fontSize = 18.sp,
-//            fontWeight = FontWeight.Bold,
-//            color = Color.Black,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp)
-//        )
-//        if (currentUser.moviesLiked.isEmpty()) {
-//            Text("Add information to have it show here", color = Color.Gray)
-//        } else {
-//            MovieList(currentUser.moviesLiked)
-//        }
     }
 }
 

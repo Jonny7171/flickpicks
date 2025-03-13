@@ -1,7 +1,7 @@
 package com.example.flickpicks.data.model
 
 data class UserProfile(
-    var id: Int = 0,
+    var id: String = "",
     var name: String = "", // Combined first and last name
     var profilePicUrl: String? = null,
     var userName: String = "",
