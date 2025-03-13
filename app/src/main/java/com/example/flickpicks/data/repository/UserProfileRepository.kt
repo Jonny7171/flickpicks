@@ -12,29 +12,29 @@ import javax.inject.Singleton
 
 interface UserProfileDatabase {
     suspend fun add(profile: UserProfile): Boolean
-    suspend fun get(profileId: Int): UserProfile?
-    suspend fun delete(profileId: Int): Boolean
-    suspend fun update(profile: UserProfile, updates: Map<String, Any>): Boolean
+    suspend fun get(profileId: String): UserProfile?
+    suspend fun delete(profileId: String): Boolean
+    suspend fun update(profileId: String, updates: Map<String, Any>): Boolean
 }
 
 class UserProfileInMemoryDatabase : UserProfileDatabase {
     private val profiles = mutableMapOf<String, UserProfile>()
 
     override suspend fun add(profile: UserProfile): Boolean {
-        profiles[profile.id.toString()] = profile
+        profiles[profile.id] = profile
         return true
     }
 
-    override suspend fun get(profileId: Int): UserProfile? {
-        return profiles[profileId.toString()]
+    override suspend fun get(profileId: String): UserProfile? {
+        return profiles[profileId]
     }
 
-    override suspend fun delete(profileId: Int): Boolean {
-        return profiles.remove(profileId.toString()) != null
+    override suspend fun delete(profileId: String): Boolean {
+        return profiles.remove(profileId) != null
     }
 
-    override suspend fun update(profile: UserProfile, updates: Map<String, Any>): Boolean {
-        val existingProfile = profiles[profile.id.toString()] ?: return false
+    override suspend fun update(profileId: String, updates: Map<String, Any>): Boolean {
+        val existingProfile = profiles[profileId] ?: return false
         updates.forEach { (key, value) ->
             when (key) {
                 "name" -> existingProfile.name = value as String
@@ -78,9 +78,9 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
     }
 
     // Get a UserProfile
-    override suspend fun get(profileId: Int): UserProfile? {
+    override suspend fun get(profileId: String): UserProfile? {
         return try {
-            val document = db.collection("users").document(profileId.toString()).get().await()
+            val document = db.collection("users").document(profileId).get().await()
             val review = document.toObject(UserProfile::class.java)
             Log.d("Firestore data", "Profile found $review ")
             review
@@ -91,10 +91,10 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
     }
 
     // Update a UserProfile
-    override suspend fun update(profile: UserProfile, updates: Map<String, Any>): Boolean {
+    override suspend fun update(profileId: String, updates: Map<String, Any>): Boolean {
         return try {
-            db.collection("users").document(profile.id.toString()).update(updates).await()
-            Log.d("Firestore", "Profile updated for: $profile.id")
+            db.collection("users").document(profileId).update(updates).await()
+            Log.d("Firestore", "Profile updated for: $profileId")
             true
         } catch (e: Exception) {
             Log.e("Firestore", "Error updating review", e)
@@ -103,9 +103,9 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
     }
 
     // Delete a UserProfile
-    override suspend fun delete(profileId: Int): Boolean {
+    override suspend fun delete(profileId: String): Boolean {
         return try {
-            db.collection("users").document(profileId.toString()).delete().await()
+            db.collection("users").document(profileId).delete().await()
             Log.d("Firestore", "Profile deleted for: $profileId")
             true
         } catch (e: Exception) {
@@ -122,15 +122,15 @@ class UserProfileRepository @Inject constructor(private val db: UserProfileDatab
         return db.add(userProfile)
     }
 
-    suspend fun getUserProfile(profileId: Int): UserProfile? {
+    suspend fun getUserProfile(profileId: String): UserProfile? {
         return db.get(profileId)
     }
 
-    suspend fun deleteUserProfile(profileId: Int): Boolean {
+    suspend fun deleteUserProfile(profileId: String): Boolean {
         return db.delete(profileId)
     }
 
-    suspend fun updateUserProfile(profile: UserProfile, updates: Map<String, Any>): Boolean {
-        return db.update(profile, updates)
+    suspend fun updateUserProfile(profileId:String, updates: Map<String, Any>): Boolean {
+        return db.update(profileId, updates)
     }
 }

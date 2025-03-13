@@ -39,14 +39,14 @@ class MyFeedViewModel @Inject constructor(
         }
     }
 
-    fun fetchReviewedByFriends(userId: Int) {
+    fun fetchReviewedByFriends(userId: String) {
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
             val friends = userProfile?.following ?: emptyList()
 
             val friendReviews = mutableListOf<MovieReview>()
             for (friendId in friends) {
-                val friendProfile = userRepository.getUserProfile(friendId.first.toInt())
+                val friendProfile = userRepository.getUserProfile(friendId.first)
                 friendProfile?.moviesReviewed?.forEach { review ->
 //                    friendReviews.add(review)
                 }
@@ -56,7 +56,7 @@ class MyFeedViewModel @Inject constructor(
         }
     }
 
-    fun fetchRecommendedMovies(userId: Int) {
+    fun fetchRecommendedMovies(userId: String) {
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
             // moviesPreferences should be genrePreferences

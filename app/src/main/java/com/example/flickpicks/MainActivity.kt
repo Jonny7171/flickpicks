@@ -36,6 +36,7 @@ import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.model.UserProfile
+import com.example.flickpicks.ui.screens.BlockedUsers
 import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.Entry
@@ -45,6 +46,7 @@ import com.example.flickpicks.ui.screens.MyFeed
 import com.example.flickpicks.ui.screens.Party
 import com.example.flickpicks.ui.screens.PartyGroup
 import com.example.flickpicks.ui.screens.Profile
+import com.example.flickpicks.ui.screens.SavedMovies
 import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.screens.Search
 import com.example.flickpicks.ui.screens.Settings
@@ -76,7 +78,7 @@ class MainActivity : ComponentActivity() {
         auth = FirebaseAuth.getInstance()
 
         val sampleUser = UserProfile(
-            id = 5,
+            id = "13",
             name = "Shaili Doe",
             email = "Jim.doe@example.com",
             userName = "jimdoe"
@@ -137,14 +139,14 @@ class MainActivity : ComponentActivity() {
         movieReviewViewModel.updateMovieReview(sampleReview, updates)
         */
 
-        /*
+/*
         // Using the userProfileModel for CRUD
         userProfileViewModel.addUserProfile(sampleUser)
         userProfileViewModel.getUserProfile(sampleUser.id)
-        userProfileViewModel.deleteUserProfile(sampleUser)
+       // userProfileViewModel.deleteUserProfile(sampleUser)
         val updates = mapOf("email" to "sk@gmail.com", "username" to "SK")
-        userProfileViewModel.updateUserProfile(sampleUser, updates)
-        */
+        userProfileViewModel.updateUserProfile(sampleUser.id, updates)
+*/
 
         /*
         // Using the partyGroupModel for CRUD
@@ -320,6 +322,12 @@ fun BottomNavigationBar() {
                 if (movieId != null) {
                     MovieDetailScreen(movieId, navigationController)
                 }
+            }
+            composable(Screens.BlockedUsers.screen) {
+                BlockedUsers(navController = navigationController)
+            }
+            composable(Screens.SavedMovies.screen) {
+                SavedMovies(navController = navigationController)
             }
         }
     }

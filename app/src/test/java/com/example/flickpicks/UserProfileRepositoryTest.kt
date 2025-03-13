@@ -22,60 +22,60 @@ class UserProfileRepositoryTest {
     @Test
     fun addUserProfile() = runBlocking {
         val user = UserProfile(
-            id = 5,
+            id = "5",
             name = "Shaili Doe",
             email = "Jim.doe@example.com",
             userName = "jimdoe"
         )
         val result = repository.addUserProfile(user)
         Assertions.assertTrue(result)
-        Assertions.assertNotNull(mockDb.get(5))
+        Assertions.assertNotNull(mockDb.get("5"))
     }
 
     @Test
     fun getUserProfile() = runBlocking{
         val user = UserProfile(
-            id = 5,
+            id = "5",
             name = "Shaili Doe",
             email = "Jim.doe@example.com",
             userName = "jimdoe"
         )
         mockDb.add(user)
 
-        val result = repository.getUserProfile(5)
+        val result = repository.getUserProfile("5")
 
         Assertions.assertNotNull(result)
-        Assertions.assertEquals(5, result?.id)
+        Assertions.assertEquals("5", result?.id)
         Assertions.assertEquals("Shaili Doe", result?.name)
     }
 
     @Test
     fun deleteUserProfile() = runBlocking {
         val user = UserProfile(
-            id = 5,
+            id = "5",
             name = "Shaili Doe",
             email = "Jim.doe@example.com",
             userName = "jimdoe"
         )
 
         mockDb.add(user)
-        val result = repository.deleteUserProfile(5)
+        val result = repository.deleteUserProfile("5")
         Assertions.assertTrue(result)
-        Assertions.assertNull(mockDb.get(5))
+        Assertions.assertNull(mockDb.get("5"))
 
     }
 
     @Test
     fun updateUserProfile() = runBlocking {
         val user = UserProfile(
-            id = 5,
+            id = "5",
             name = "Shaili Doe",
             email = "Jim.doe@example.com",
             userName = "jimdoe"
         )
         mockDb.add(user)
         val updates = mapOf("email" to "shailidoe@example.com", "username" to "SK")
-        val result = repository.updateUserProfile(user, updates)
+        val result = repository.updateUserProfile(user.id, updates)
         Assertions.assertTrue(result)
     }
 }
