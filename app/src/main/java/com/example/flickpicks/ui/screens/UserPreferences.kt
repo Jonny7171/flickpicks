@@ -62,14 +62,13 @@ fun UserPreferences(
         }
     }
 
-    // Outer column uses SpaceBetween to pin the bottom section
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // TOP SECTION: Title + scrollable list of genres
+        // Title + scrollable list of genres
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -117,7 +116,7 @@ fun UserPreferences(
             }
         }
 
-        // BOTTOM SECTION: Error message + button
+        // Error message + button
         Column {
             if (errorMessage.isNotEmpty()) {
                 Text(
