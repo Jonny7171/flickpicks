@@ -23,18 +23,19 @@ import com.google.firebase.auth.FirebaseAuth
 fun UserPreferences(
     navController: NavController
 ) {
-    // Get MainViewModel instance
     val userProfileViewModel = viewModel<UserProfileViewModel>(
         viewModelStoreOwner = LocalContext.current as ComponentActivity
     )
 
-    //List of genres
-    val commonGenres = listOf("Action", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller")
+    val commonGenres = listOf(
+        "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
+        "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery",
+        "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
+    )
 
     // Track which genres are selected
     val selectedGenres = remember { mutableStateListOf<String>() }
 
-    // For displaying an error if the user tries to proceed with fewer than 2 genres
     var errorMessage by remember { mutableStateOf("") }
 
     fun finalizePreferences() {
@@ -52,8 +53,7 @@ fun UserPreferences(
             return
         }
         val userProfile = userProfileViewModel.getUserProfile(userId)
-        Log.d("Firestore", "${userProfile}")
-
+        Log.d("Firestore", "$userProfile")
         userProfile.let {
             userProfileViewModel.updateUserProfile(userId, mapOf("genrePreferences" to selectedGenres))
             navController.navigate(Screens.MyFeed.screen) {
@@ -62,68 +62,78 @@ fun UserPreferences(
         }
     }
 
+    // Outer column uses SpaceBetween to pin the bottom section
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = "Select Your Interests",
-            style = MaterialTheme.typography.headlineLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // TOP SECTION: Title + scrollable list of genres
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = "Select Your Interests",
+                style = MaterialTheme.typography.headlineLarge
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // List all common genres with a checkbox
-        LazyColumn {
-            items(commonGenres) { genre ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            if (selectedGenres.contains(genre)) {
-                                selectedGenres.remove(genre)
-                            } else {
-                                selectedGenres.add(genre)
+            // Chunk the genres list into rows of 2 items
+            val chunkedGenres = commonGenres.chunked(2)
+            LazyColumn {
+                items(chunkedGenres) { genreRow ->
+                    Row {
+                        for (genre in genreRow) {
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable {
+                                        if (selectedGenres.contains(genre)) {
+                                            selectedGenres.remove(genre)
+                                        } else {
+                                            selectedGenres.add(genre)
+                                        }
+                                    }
+                                    .padding(8.dp)
+                            ) {
+                                val isChecked = selectedGenres.contains(genre)
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            selectedGenres.add(genre)
+                                        } else {
+                                            selectedGenres.remove(genre)
+                                        }
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = genre)
                             }
                         }
-                        .padding(8.dp),
-                    // Keep checkboxes vertically centered
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    val isChecked = selectedGenres.contains(genre)
-                    Checkbox(
-                        checked = isChecked,
-                        onCheckedChange = { checked ->
-                            if (checked) {
-                                selectedGenres.add(genre)
-                            } else {
-                                selectedGenres.remove(genre)
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = genre)
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // BOTTOM SECTION: Error message + button
+        Column {
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
-        //Error
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        // Button to confirm preferences
-        Button(
-            onClick = { finalizePreferences() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Complete Preferences")
+            Button(
+                onClick = { finalizePreferences() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Complete Preferences")
+            }
         }
     }
 }
