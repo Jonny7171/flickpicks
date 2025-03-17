@@ -38,26 +38,23 @@ import com.example.flickpicks.ui.viewmodels.UserSearchViewModel
 @Composable
 fun UserSearchScreen(navController: NavController) {
     var searchText by remember { mutableStateOf("") }
+    var hasSearched by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-
     val userSearchViewModel: UserSearchViewModel = viewModel()
-
-    // A status message for friend request results.
     var requestStatus by remember { mutableStateOf("") }
 
     fun performSearch() {
         keyboardController?.hide()
         focusManager.clearFocus()
+        hasSearched = true
         userSearchViewModel.searchUsers(searchText)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Search Users") }
-            )
+            TopAppBar(title = { Text("Search Users") })
         }
     ) { innerPadding ->
         Column(
@@ -87,22 +84,23 @@ fun UserSearchScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display any friend request status messages
+            // Display "User not found" if no results
+            if (hasSearched && userSearchViewModel.userList.value.isEmpty() && searchText.isNotBlank()) {
+                Text(text = "User not found", fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             if (requestStatus.isNotEmpty()) {
                 Text(text = requestStatus, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Display the list of users
+            // Display users
             LazyColumn {
                 items(userSearchViewModel.userList.value) { user ->
                     SearchUserItem(user = user, onSendRequest = { targetUser ->
-                        userSearchViewModel.sendFriendRequest(targetUser) { success ->
-                            requestStatus = if (success) {
-                                "Friend request sent to ${targetUser.name}!"
-                            } else {
-                                "Failed to send friend request to ${targetUser.name}."
-                            }
+                        userSearchViewModel.sendFriendRequest(targetUser) { success, message ->
+                            requestStatus = message
                             Toast.makeText(context, requestStatus, Toast.LENGTH_SHORT).show()
                         }
                     })
@@ -113,10 +111,13 @@ fun UserSearchScreen(navController: NavController) {
 }
 
 @Composable
-fun SearchUserItem(user: com.example.flickpicks.data.model.UserProfile, onSendRequest: (com.example.flickpicks.data.model.UserProfile) -> Unit) {
+fun SearchUserItem(
+    user: com.example.flickpicks.data.model.UserProfile,
+    onSendRequest: (com.example.flickpicks.data.model.UserProfile) -> Unit
+) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = user.name, fontSize = 24.sp)
-        Text(text = user.email, fontSize = 16.sp)
+        // Display usernames
+        Text(text = user.userName, fontSize = 24.sp)
         Button(
             onClick = { onSendRequest(user) },
             modifier = Modifier.fillMaxWidth()

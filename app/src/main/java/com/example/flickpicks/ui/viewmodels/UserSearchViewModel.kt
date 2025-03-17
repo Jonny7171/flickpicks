@@ -4,11 +4,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.flickpicks.data.model.UserProfile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 
 class UserSearchViewModel : ViewModel() {
-    // Holds the list of users matching the search query.
+    // Holds the list of users matching the query
     val userList = mutableStateOf<List<UserProfile>>(emptyList())
 
     fun searchUsers(query: String) {
@@ -17,9 +17,9 @@ class UserSearchViewModel : ViewModel() {
             return
         }
         val firestore = FirebaseFirestore.getInstance()
-        // Get Users
+        // Query on usernames
         firestore.collection("users")
-            .orderBy("name")
+            .orderBy("userName")
             .startAt(query)
             .endAt(query + "\uf8ff")
             .get()
@@ -33,26 +33,44 @@ class UserSearchViewModel : ViewModel() {
                 userList.value = emptyList()
             }
     }
-//Send friend requests, ie updating Outgoing and Incoming requests appropriately
-    fun sendFriendRequest(targetUser: UserProfile, onComplete: (Boolean) -> Unit) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            onComplete(false)
+
+    fun sendFriendRequest(targetUser: UserProfile, onComplete: (Boolean, String) -> Unit) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId == null) {
+            onComplete(false, "User not authenticated")
+            return
+        }
+        if (currentUserId == targetUser.id) {
+            onComplete(false, "Can't send friend request to yourself")
             return
         }
         val firestore = FirebaseFirestore.getInstance()
         val currentUserRef = firestore.collection("users").document(currentUserId)
         val targetUserRef = firestore.collection("users").document(targetUser.id)
 
-        // Update current user's outgoingRequests
-        currentUserRef.update("outgoingRequests", FieldValue.arrayUnion(targetUser.id))
-            .addOnSuccessListener {
-                // Update target user's incomingRequests
-                targetUserRef.update("incomingRequests", FieldValue.arrayUnion(currentUserId))
-                    .addOnSuccessListener {
-                        onComplete(true)
-                    }
-                    .addOnFailureListener { onComplete(false) }
+        // Ensure request hasn been sent before
+        currentUserRef.get().addOnSuccessListener { currentDoc ->
+            val outgoing = currentDoc.get("outgoingRequests") as? List<String> ?: emptyList()
+            if (outgoing.contains(targetUser.id)) {
+                onComplete(false, "Friend request already sent to ${targetUser.userName}")
+                return@addOnSuccessListener
             }
-            .addOnFailureListener { onComplete(false) }
+            // update the outgoingRequests and incomingRequests field
+            currentUserRef.update("outgoingRequests", FieldValue.arrayUnion(targetUser.id))
+                .addOnSuccessListener {
+                    targetUserRef.update("incomingRequests", FieldValue.arrayUnion(currentUserId))
+                        .addOnSuccessListener {
+                            onComplete(true, "Friend request sent to ${targetUser.userName}!")
+                        }
+                        .addOnFailureListener {
+                            onComplete(false, "Failed to update target user's incoming requests")
+                        }
+                }
+                .addOnFailureListener {
+                    onComplete(false, "Failed to update your outgoing requests")
+                }
+        }.addOnFailureListener {
+            onComplete(false, "Failed to get your user data")
+        }
     }
 }
