@@ -59,6 +59,54 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
             false
         }
     }
+
+    fun acceptFriendRequest(requestUserId: String) {
+        viewModelScope.launch {
+            val current = _userProfile.value ?: return@launch
+            // Remove the request from incomingRequests
+            current.incomingRequests.remove(requestUserId)
+            // Fetch the other user's profile
+            val otherUser = repository.getUserProfile(requestUserId) ?: return@launch
+            // Remove current user's ID from their outgoingRequests
+            otherUser.outgoingRequests.remove(current.id)
+            // Add each user to the other's friends list (here we assume "followers" serves as friends)
+            current.followers.add(Pair(requestUserId, otherUser.userName))
+            otherUser.followers.add(Pair(current.id, current.userName))
+            // Update Firestore for both users
+            repository.updateUserProfile(current.id, mapOf(
+                "incomingRequests" to current.incomingRequests,
+                "followers" to current.followers
+            ))
+            repository.updateUserProfile(otherUser.id, mapOf(
+                "outgoingRequests" to otherUser.outgoingRequests,
+                "followers" to otherUser.followers
+            ))
+            _userProfile.value = current
+        }
+    }
+
+    fun declineFriendRequest(requestUserId: String) {
+        viewModelScope.launch {
+            val current = _userProfile.value ?: return@launch
+            current.incomingRequests.remove(requestUserId)
+            val otherUser = repository.getUserProfile(requestUserId) ?: return@launch
+            otherUser.outgoingRequests.remove(current.id)
+            repository.updateUserProfile(current.id, mapOf(
+                "incomingRequests" to current.incomingRequests
+            ))
+            repository.updateUserProfile(otherUser.id, mapOf(
+                "outgoingRequests" to otherUser.outgoingRequests
+            ))
+            _userProfile.value = current
+        }
+    }
+
+    // For preview purposes: expose a setter for _userProfile
+    fun setPreviewProfile(profile: UserProfile) {
+        _userProfile.value = profile
+    }
 }
+
+
 
 

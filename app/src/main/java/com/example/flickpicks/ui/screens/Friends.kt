@@ -2,74 +2,52 @@ package com.example.flickpicks.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.data.model.UserProfile
-
-val followingList = listOf(
-    UserProfile("1", "Alice Johnson", "https://via.placeholder.com/150"),
-    UserProfile("2", "Bob Smith", "https://via.placeholder.com/150"),
-    UserProfile("3", "Charlie Brown", "https://via.placeholder.com/150")
-)
-
-val followersList = listOf(
-    UserProfile("4", "David Miller", "https://via.placeholder.com/150"),
-    UserProfile("5", "Emma Wilson", "https://via.placeholder.com/150"),
-    UserProfile("6", "Frankie Thomas", "https://via.placeholder.com/150")
-)
-
-val friendRequests = listOf(
-    UserProfile("7", "Grace Lee", "https://via.placeholder.com/150"),
-    UserProfile("8", "Henry Carter", "https://via.placeholder.com/150")
-)
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
+import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
+import com.example.flickpicks.data.repository.UserProfileRepository
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Friends(navController: NavController) {
-    var selectedTab by remember { mutableStateOf("Following") }
+fun Friends(
+    navController: NavController,
+    userProfileViewModel: UserProfileViewModel = viewModel()
+) {
+    val currentUser = userProfileViewModel.userProfile.value
+    val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+
+    // Ensure the current user's profile is fetched
+    LaunchedEffect(key1 = auth.currentUser?.uid) {
+        val uid = auth.currentUser?.uid
+        if (uid != null && currentUser == null) {
+            userProfileViewModel.fetchUserProfile(uid)
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Friends") },
                 actions = {
-                    // Search icon in the top bar
                     IconButton(onClick = {
                         navController.navigate(Screens.UserSearch.screen)
                     }) {
@@ -82,88 +60,62 @@ fun Friends(navController: NavController) {
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            Row(
+        if (currentUser == null) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
             ) {
-                listOf("Following", "Followers", "Requests").forEach { tab ->
-                    Button(
-                        onClick = { selectedTab = tab },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedTab == tab)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Text(
-                            text = tab,
-                            color = if (selectedTab == tab) Color.White else Color.Black
-                        )
-                    }
-                }
+                Text("Loading...", fontSize = 18.sp)
             }
+        } else {
+            var selectedTab by remember { mutableStateOf("Friends") }
 
-            when (selectedTab) {
-                "Following" -> UserList(followingList, buttonText = "Unfollow") {  }
-                "Followers" -> UserList(followersList, buttonText = "Remove") { }
-                "Requests" -> UserList(friendRequests, buttonText1 = "Accept", buttonText2 = "Decline") {  }
-            }
-        }
-    }
-}
-
-@Composable
-fun UserList(
-    users: List<UserProfile>,
-    buttonText: String? = null,
-    buttonText1: String? = null,
-    buttonText2: String? = null,
-    onButtonClick: (UserProfile) -> Unit
-) {
-    LazyColumn(modifier = Modifier.padding(8.dp)) {
-        items(users) { user ->
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(user.profilePicUrl),
-                    contentDescription = "Profile Picture",
+                Row(
                     modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = user.name,
-                    fontSize = 16.sp,
-                    modifier = Modifier.weight(1f)
-                )
-
-                if (buttonText != null) {
-                    Button(onClick = { onButtonClick(user) }) {
-                        Text(text = buttonText)
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    listOf("Friends", "Requests").forEach { tab ->
+                        Button(
+                            onClick = { selectedTab = tab },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (selectedTab == tab)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Text(
+                                text = tab,
+                                color = if (selectedTab == tab) Color.White else Color.Black
+                            )
+                        }
                     }
-                } else if (buttonText1 != null && buttonText2 != null) {
-                    Row {
-                        Button(onClick = { onButtonClick(user) }) {
-                            Text(text = buttonText1)
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Button(onClick = { onButtonClick(user) }) {
-                            Text(text = buttonText2, color = Color.White)
-                        }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                when (selectedTab) {
+                    "Friends" -> {
+                        // followers = friends
+                        FriendsList(friends = currentUser.followers)
+                    }
+                    "Requests" -> {
+                        RequestsList(
+                            incomingRequests = currentUser.incomingRequests,
+                            onAccept = { requestUserId ->
+                                userProfileViewModel.acceptFriendRequest(requestUserId)
+                            },
+                            onDecline = { requestUserId ->
+                                userProfileViewModel.declineFriendRequest(requestUserId)
+                            }
+                        )
                     }
                 }
             }
@@ -171,9 +123,102 @@ fun UserList(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PreviewFriends() {
-    val navController = rememberNavController()
-    Friends(navController = navController)
+fun FriendsList(friends: List<Pair<String, String>>) {
+    if (friends.isEmpty()) {
+        Text(
+            text = "No friends found.",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(16.dp)
+        )
+    } else {
+        LazyColumn(modifier = Modifier.padding(8.dp)) {
+            items(friends) { friendPair ->
+                FriendItem(friendPair = friendPair)
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendItem(friendPair: Pair<String, String>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter("https://via.placeholder.com/150"),
+            contentDescription = "Friend Profile Picture",
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(Color.Gray)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = friendPair.second,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun RequestsList(
+    incomingRequests: List<String>,
+    onAccept: (String) -> Unit,
+    onDecline: (String) -> Unit
+) {
+    if (incomingRequests.isEmpty()) {
+        Text(
+            text = "No friend requests.",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(16.dp)
+        )
+    } else {
+        LazyColumn(modifier = Modifier.padding(8.dp)) {
+            items(incomingRequests) { requestUserId ->
+                FriendRequestItem(
+                    requestUserId = requestUserId,
+                    onAccept = { onAccept(requestUserId) },
+                    onDecline = { onDecline(requestUserId) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendRequestItem(
+    requestUserId: String,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    val userName by produceState(initialValue = "Loading...", key1 = requestUserId) {
+        val repository = UserProfileRepository(UserProfileFirestoreDatabase())
+        val profile = try {
+            repository.getUserProfile(requestUserId)
+        } catch (e: Exception) {
+            null
+        }
+        value = profile?.userName ?: "Unknown"
+    }
+
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Text(text = "User: $userName", fontSize = 20.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(onClick = onAccept, modifier = Modifier.weight(1f)) {
+                Text("Accept")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = onDecline, modifier = Modifier.weight(1f)) {
+                Text("Decline")
+            }
+        }
+    }
 }
