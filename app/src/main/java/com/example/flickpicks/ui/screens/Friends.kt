@@ -14,10 +14,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.data.model.UserProfile
 
@@ -50,46 +59,76 @@ val friendRequests = listOf(
     UserProfile("8", "Henry Carter", "https://via.placeholder.com/150")
 )
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Friends() {
+fun Friends(navController: NavController) {
     var selectedTab by remember { mutableStateOf("Following") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Friends") },
+                actions = {
+                    // Search icon in the top bar
+                    IconButton(onClick = {
+                        navController.navigate(Screens.UserSearch.screen)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search Users"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            listOf("Following", "Followers", "Requests").forEach { tab ->
-                Button(
-                    onClick = { selectedTab = tab },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Text(
-                        text = tab,
-                        color = if (selectedTab == tab) Color.White else Color.Black
-                    )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                listOf("Following", "Followers", "Requests").forEach { tab ->
+                    Button(
+                        onClick = { selectedTab = tab },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedTab == tab)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Text(
+                            text = tab,
+                            color = if (selectedTab == tab) Color.White else Color.Black
+                        )
+                    }
                 }
             }
-        }
 
-        when (selectedTab) {
-            "Following" -> UserList(followingList, buttonText = "Unfollow") { /* Handle Unfollow */ }
-            "Followers" -> UserList(followersList, buttonText = "Remove") { /* Handle Remove Follower */ }
-            "Requests" -> UserList(friendRequests, buttonText1 = "Accept", buttonText2 = "Decline") { /* Handle Accept/Decline */ }
+            when (selectedTab) {
+                "Following" -> UserList(followingList, buttonText = "Unfollow") {  }
+                "Followers" -> UserList(followersList, buttonText = "Remove") { }
+                "Requests" -> UserList(friendRequests, buttonText1 = "Accept", buttonText2 = "Decline") {  }
+            }
         }
     }
 }
 
 @Composable
-fun UserList(users: List<UserProfile>, buttonText: String? = null, buttonText1: String? = null, buttonText2: String? = null, onButtonClick: (UserProfile) -> Unit) {
-    LazyColumn(
-        modifier = Modifier.padding(8.dp)
-    ) {
+fun UserList(
+    users: List<UserProfile>,
+    buttonText: String? = null,
+    buttonText1: String? = null,
+    buttonText2: String? = null,
+    onButtonClick: (UserProfile) -> Unit
+) {
+    LazyColumn(modifier = Modifier.padding(8.dp)) {
         items(users) { user ->
             Row(
                 modifier = Modifier
@@ -135,5 +174,6 @@ fun UserList(users: List<UserProfile>, buttonText: String? = null, buttonText1: 
 @Preview(showBackground = true)
 @Composable
 fun PreviewFriends() {
-    Friends()
+    val navController = rememberNavController()
+    Friends(navController = navController)
 }
