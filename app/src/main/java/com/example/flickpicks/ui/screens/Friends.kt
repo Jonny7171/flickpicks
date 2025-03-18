@@ -19,23 +19,23 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Friends(
     navController: NavController,
-    userProfileViewModel: UserProfileViewModel = viewModel()
+    userProfileViewModel: UserProfileViewModel = viewModel() // Real ViewModel provided by Hilt
 ) {
     val currentUser = userProfileViewModel.userProfile.value
-    val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+    val auth = FirebaseAuth.getInstance()
 
-    // Ensure the current user's profile is fetched
+    // Ensure the current user's profile is fetched (using the same instance)
     LaunchedEffect(key1 = auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null && currentUser == null) {
@@ -77,6 +77,7 @@ fun Friends(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
+                // Tab Buttons: "Friends" and "Requests"
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,8 +104,13 @@ fun Friends(
                 Spacer(modifier = Modifier.height(8.dp))
                 when (selectedTab) {
                     "Friends" -> {
-                        // followers = friends
-                        FriendsList(friends = currentUser.followers)
+                        // Use followers as friends; pass a callback for removal.
+                        FriendsList(
+                            friends = currentUser.followers,
+                            onRemove = { friendId ->
+                                userProfileViewModel.removeFriend(friendId)
+                            }
+                        )
                     }
                     "Requests" -> {
                         RequestsList(
@@ -124,7 +130,10 @@ fun Friends(
 }
 
 @Composable
-fun FriendsList(friends: List<Pair<String, String>>) {
+fun FriendsList(
+    friends: List<Friend>,
+    onRemove: (String) -> Unit
+) {
     if (friends.isEmpty()) {
         Text(
             text = "No friends found.",
@@ -133,15 +142,15 @@ fun FriendsList(friends: List<Pair<String, String>>) {
         )
     } else {
         LazyColumn(modifier = Modifier.padding(8.dp)) {
-            items(friends) { friendPair ->
-                FriendItem(friendPair = friendPair)
+            items(friends) { friend ->
+                FriendItem(friend = friend, onRemove = { onRemove(friend.id) })
             }
         }
     }
 }
 
 @Composable
-fun FriendItem(friendPair: Pair<String, String>) {
+fun FriendItem(friend: Friend, onRemove: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,10 +167,13 @@ fun FriendItem(friendPair: Pair<String, String>) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = friendPair.second,
+            text = friend.userName,
             fontSize = 16.sp,
             modifier = Modifier.weight(1f)
         )
+        Button(onClick = onRemove) {
+            Text("Remove")
+        }
     }
 }
 
@@ -196,6 +208,7 @@ fun FriendRequestItem(
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
+    // Asynchronously load the username for the friend request using produceState.
     val userName by produceState(initialValue = "Loading...", key1 = requestUserId) {
         val repository = UserProfileRepository(UserProfileFirestoreDatabase())
         val profile = try {

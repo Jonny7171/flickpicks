@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
@@ -65,13 +66,11 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
             val current = _userProfile.value ?: return@launch
             // Remove the request from incomingRequests
             current.incomingRequests.remove(requestUserId)
-            // Fetch the other user's profile
             val otherUser = repository.getUserProfile(requestUserId) ?: return@launch
             // Remove current user's ID from their outgoingRequests
             otherUser.outgoingRequests.remove(current.id)
-            // Add each user to the other's friends list (here we assume "followers" serves as friends)
-            current.followers.add(Pair(requestUserId, otherUser.userName))
-            otherUser.followers.add(Pair(current.id, current.userName))
+            current.followers.add(Friend(requestUserId, otherUser.userName))
+            otherUser.followers.add(Friend(current.id, current.userName))
             // Update Firestore for both users
             repository.updateUserProfile(current.id, mapOf(
                 "incomingRequests" to current.incomingRequests,
@@ -97,6 +96,25 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
             repository.updateUserProfile(otherUser.id, mapOf(
                 "outgoingRequests" to otherUser.outgoingRequests
             ))
+            _userProfile.value = current
+        }
+    }
+
+    fun removeFriend(friendId: String) {
+        viewModelScope.launch {
+            val current = _userProfile.value ?: return@launch
+            // Remove friend from current user's friends
+            val updatedFriends = current.followers.filterNot { it.id == friendId }.toMutableList()
+            current.followers = updatedFriends
+            val friendProfile = repository.getUserProfile(friendId) ?: return@launch
+            val updatedFriendList = friendProfile.followers.filterNot { it.id == current.id }.toMutableList()
+            friendProfile.followers = updatedFriendList
+
+            // Update Firestore
+            repository.updateUserProfile(current.id, mapOf("followers" to current.followers))
+            repository.updateUserProfile(friendId, mapOf("followers" to friendProfile.followers))
+
+            // Update local state
             _userProfile.value = current
         }
     }

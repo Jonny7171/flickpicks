@@ -3,6 +3,7 @@ package com.example.flickpicks.ui.viewmodels
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
 
 class PreviewUserProfileViewModel : ViewModel() {
@@ -14,8 +15,11 @@ class PreviewUserProfileViewModel : ViewModel() {
         _userProfile.value = UserProfile(
             id = "currentUserId",
             userName = "currentUser",
-            followers = mutableListOf("friend1" to "Alice", "friend2" to "Bob"),
-            incomingRequests = mutableListOf("request1", "request2")
+            followers = mutableListOf(
+                Friend("friend1", "Alice"),
+                Friend("friend2", "Bob")
+            ),
+                    incomingRequests = mutableListOf("request1", "request2")
         )
     }
 

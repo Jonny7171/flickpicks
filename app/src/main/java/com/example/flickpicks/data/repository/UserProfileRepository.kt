@@ -1,6 +1,7 @@
 package com.example.flickpicks.data.repository
 
 import android.util.Log
+import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.model.UserProfile
@@ -43,8 +44,8 @@ class UserProfileInMemoryDatabase : UserProfileDatabase {
                 "password" -> existingProfile.password = value as String
                 "email" -> existingProfile.email = value as String
                 "phoneNumber" -> existingProfile.phoneNumber = value as String
-                "following" -> existingProfile.following = value as MutableList<Pair<String, String>>
-                "followers" -> existingProfile.followers = value as MutableList<Pair<String, String>>
+                "following" -> existingProfile.following = value as MutableList<Friend>
+                "followers" -> existingProfile.followers = value as MutableList<Friend>
                 "blockedUsers" -> existingProfile.blockedUsers = value as MutableList<String>
                 "incomingRequests" -> existingProfile.incomingRequests = value as MutableList<String>
                 "outgoingRequests" -> existingProfile.outgoingRequests = value as MutableList<String>
