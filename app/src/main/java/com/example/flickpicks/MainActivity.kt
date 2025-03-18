@@ -39,6 +39,7 @@ import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.screens.BlockedUsers
 import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
+import com.example.flickpicks.ui.screens.UserSearchScreen
 import com.example.flickpicks.ui.screens.Entry
 import com.example.flickpicks.ui.screens.Friends
 import com.example.flickpicks.ui.screens.MovieDetailScreen
@@ -285,6 +286,10 @@ fun BottomNavigationBar() {
             composable(Screens.SignUp.screen) {
                 SignUp(navController = navigationController)
             }
+            composable(Screens.UserSearch.screen) {
+                UserSearchScreen(navController = navigationController)
+            }
+
             composable(Screens.SignIn.screen) {
                 SignIn(navController = navigationController)
             }
@@ -295,7 +300,9 @@ fun BottomNavigationBar() {
                 UserPreferences(navController = navigationController)
             }
             composable(Screens.Search.screen)  { Search() }
-            composable(Screens.Friends.screen) { Friends() }
+            composable(Screens.Friends.screen) {
+                Friends(navController = navigationController)
+            }
             composable(Screens.Party.screen)   {
                 Party(navController = navigationController)
             }
