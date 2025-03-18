@@ -1,8 +1,8 @@
-
 package com.example.flickpicks.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,15 +17,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +44,6 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
-
 
 @Composable
 fun Profile(
@@ -66,6 +71,9 @@ fun Profile(
         }
         return
     }
+
+    // State to control whether the edit preferences dialog is visible
+    var showPreferencesDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -101,7 +109,7 @@ fun Profile(
                 painter = if (profilePicUrl.isNotBlank())
                     rememberAsyncImagePainter(profilePicUrl)
                 else
-                    rememberAsyncImagePainter("https://via.placeholder.com/150"), // Placeholder image
+                    rememberAsyncImagePainter("https://via.placeholder.com/150"),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(150.dp)
@@ -161,20 +169,44 @@ fun Profile(
         }
 
         item {
-            // Movie Preferences Section
-            Text(
-                text = "Movie Preferences",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
+            // Movie Preferences Section with clickable area to prompt edit
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { showPreferencesDialog = true }
                     .padding(vertical = 8.dp)
-            )
-            if (currentUser?.genrePreferences.isNullOrEmpty()) {
-                Text("No preferences selected", color = Color.Gray)
-            } else {
-                PreferencesList(currentUser!!.genrePreferences)
+            ) {
+                Text(
+                    text = "Movie Preferences",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                if (currentUser?.genrePreferences.isNullOrEmpty()) {
+                    Text("No preferences selected", color = Color.Gray)
+                } else {
+                    PreferencesList(currentUser!!.genrePreferences)
+                }
+            }
+            if (showPreferencesDialog) {
+                AlertDialog(
+                    onDismissRequest = { showPreferencesDialog = false },
+                    title = { Text("Edit Preferences?") },
+                    text = { Text("Do you want to edit your movie preferences?") },
+                    confirmButton = {
+                        Button(onClick = {
+                            showPreferencesDialog = false
+                            navController.navigate(Screens.UserPreferences.screen)
+                        }) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showPreferencesDialog = false }) {
+                            Text("No")
+                        }
+                    }
+                )
             }
         }
 
