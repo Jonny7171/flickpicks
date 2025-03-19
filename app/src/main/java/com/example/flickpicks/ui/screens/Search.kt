@@ -155,8 +155,10 @@ fun SearchMovieItem(
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Overview: ${movie.overview}", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Rating: ⭐ ${movie.vote_average}", style = MaterialTheme.typography.labelMedium)
-
+            Text(
+                text = "Rating: ⭐ ${"%.1f".format((movie.vote_average.toFloat() / 2))} / 5",
+                style = MaterialTheme.typography.labelMedium
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
