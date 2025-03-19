@@ -299,7 +299,7 @@ fun BottomNavigationBar() {
             composable(Screens.UserPreferences.screen)  {
                 UserPreferences(navController = navigationController)
             }
-            composable(Screens.Search.screen)  { Search() }
+            composable(Screens.Search.screen)  { Search(navController = navigationController) }
             composable(Screens.Friends.screen) {
                 Friends(navController = navigationController)
             }

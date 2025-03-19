@@ -143,4 +143,32 @@ class MoviesRepositoryTest {
         Assertions.assertNotNull(result)
         Assertions.assertTrue(result!!.isEmpty())
     }
+    @Test
+    fun searchMovies() = runBlocking {
+        val searchQuery = "Inception"
+        val movies = listOf(
+            Movie("1", "Inception", "2010-07-16", "A mind-bending thriller", "", listOf("Sci-Fi", "Thriller"), "", "8.8", "url"),
+            Movie("2", "Interstellar", "2014-11-07", "Exploring space and time", "", listOf("Sci-Fi", "Adventure"), "", "8.6", "url")
+        )
+
+        `when`(moviesSource.searchMovies(searchQuery)).thenReturn(movies)
+
+        val result = moviesRepository.searchMovie(searchQuery)
+
+        Assertions.assertEquals(2, result.size)
+        Assertions.assertEquals("Inception", result[0].title)
+        Assertions.assertEquals("Interstellar", result[1].title)
+    }
+
+    @Test
+    fun searchMovies_NoResults() = runBlocking {
+        val searchQuery = "NonExistentMovie"
+
+        `when`(moviesSource.searchMovies(searchQuery)).thenReturn(emptyList())
+
+        val result = moviesRepository.searchMovie(searchQuery)
+
+        Assertions.assertNotNull(result)
+        Assertions.assertTrue(result.isEmpty())
+    }
 }
