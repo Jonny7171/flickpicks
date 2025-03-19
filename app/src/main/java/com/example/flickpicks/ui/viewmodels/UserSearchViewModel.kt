@@ -6,8 +6,11 @@ import com.example.flickpicks.data.model.UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class UserSearchViewModel : ViewModel() {
+@HiltViewModel
+class UserSearchViewModel @Inject constructor() : ViewModel() {
     // Holds the list of users matching the query
     val userList = mutableStateOf<List<UserProfile>>(emptyList())
 

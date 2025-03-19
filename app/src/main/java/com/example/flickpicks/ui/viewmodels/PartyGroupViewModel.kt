@@ -7,10 +7,13 @@ import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.PartyGroupRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PartyGroupViewModel: ViewModel() {
+@HiltViewModel
+class PartyGroupViewModel @Inject constructor() : ViewModel() {
     val repository = PartyGroupRepository(PartyGroupFirestoreDatabase())
 
     val messages = mutableListOf(

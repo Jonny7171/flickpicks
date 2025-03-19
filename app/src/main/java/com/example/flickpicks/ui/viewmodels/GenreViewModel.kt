@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.Genre
 import com.example.flickpicks.data.repository.GenreFirestoreDatabase
 import com.example.flickpicks.data.repository.GenreRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class GenreViewModel: ViewModel() {
+@HiltViewModel
+class GenreViewModel @Inject constructor() : ViewModel() {
         val repository = GenreRepository(GenreFirestoreDatabase())
      fun addGenre(genre: Genre) {
         viewModelScope.launch {

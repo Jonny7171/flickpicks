@@ -23,9 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -213,7 +212,7 @@ fun Profile(
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
         item {
-            // Watch History Section
+            // Saved Movies
             Text(
                 text = "Saved Movies",
                 fontSize = 18.sp,
@@ -233,6 +232,46 @@ fun Profile(
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
         item {
+            // Liked
+            Text(
+                text = "Liked Movies",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (currentUser?.moviesLiked.isNullOrEmpty()) {
+                Text("No liked movies", color = Color.Gray)
+            } else {
+                MovieList(currentUser!!.moviesLiked)
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item {
+            // Disliked
+            Text(
+                text = "Disliked Movies",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (currentUser?.moviesDisliked.isNullOrEmpty()) {
+                Text("No disliked movies", color = Color.Gray)
+            } else {
+                MovieList(currentUser!!.moviesDisliked)
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item {
             // Ratings & Reviews Section
             Text(
                 text = "Ratings & Reviews",
@@ -246,7 +285,7 @@ fun Profile(
             if (currentUser?.moviesReviewed.isNullOrEmpty()) {
                 Text("No reviews available", color = Color.Gray)
             } else {
-                RatingsList(listOf("No ratings available"))
+                RatingsList(currentUser!!.moviesReviewed)
             }
         }
 
@@ -283,15 +322,41 @@ fun MovieList(movies: List<String>) {
 }
 
 @Composable
-fun RatingsList(ratings: List<String>) {
+fun RatingsList(ratings: List<MovieReview>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.LightGray, RoundedCornerShape(8.dp))
             .padding(12.dp)
     ) {
-        ratings.forEach {
-            Text(text = "⭐ $it", fontSize = 14.sp, color = Color.Black)
+        ratings.forEach { review ->
+            // Display movie name, rating, review text, and where it was watched
+            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                Text(
+                    text = review.movieTitle,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Rating: ⭐ ${review.rating} / 5",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Where Watched: ${review.streamingPlatform}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Review: ${review.reviewText}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+            }
         }
     }
 }
