@@ -199,4 +199,28 @@ class MoviesSource {
             null
         }
     }
+    suspend fun searchMovies(query: String) : List<Movie> {
+        val url = "$TMDB_BASE_URL/search/movie?api_key=$TMDB_API_KEY&query=$query"
+        return try {
+            val response: JsonObject = client.get(url).body()
+            response["results"]?.jsonArray?.map { jsonElement ->
+                val obj = jsonElement.jsonObject
+                Movie(
+                    id = obj["id"]?.jsonPrimitive?.content ?: "",
+                    title = obj["title"]?.jsonPrimitive?.content ?: "",
+                    release_date = obj["release_date"]?.jsonPrimitive?.content ?: "",
+                    overview = obj["overview"]?.jsonPrimitive?.content ?: "",
+                    tagline = "", // TMDB doesn't provide tagline in search API
+                    genres = emptyList(), // Fetch genre separately if needed
+                    poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
+                    vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
+                    trailer = null
+                )
+            } ?: emptyList()
+        } catch (e: Exception) {
+            println("Error searching for movies: ${e.localizedMessage}")
+            emptyList()
+        }
+    }
+
 }

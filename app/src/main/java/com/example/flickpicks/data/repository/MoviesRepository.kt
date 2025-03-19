@@ -26,4 +26,8 @@ class MoviesRepository @Inject constructor(
     suspend fun getMovieReviews(
         movieId: String
     ) : List<Pair<String, String>>? = moviesSource.getMovieReviews(movieId)
+
+    suspend fun searchMovie(query: String) : List<Movie> {
+        return moviesSource.searchMovies(query)
+    }
 }
