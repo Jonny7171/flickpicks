@@ -58,6 +58,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -110,11 +111,13 @@ dependencies {
     testImplementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.androidx.core.testing.v210)
     testImplementation(libs.robolectric)
-    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+
+    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0") // Enables @ExtendWith(MockitoExtension::class)
 
     // Ktor Client
     implementation(libs.ktor.client.android)

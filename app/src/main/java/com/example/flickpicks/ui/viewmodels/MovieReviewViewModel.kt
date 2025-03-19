@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.repository.MovieReviewFirestoreDatabase
 import com.example.flickpicks.data.repository.MovieReviewRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MovieReviewViewModel: ViewModel() {
+@HiltViewModel
+class MovieReviewViewModel @Inject constructor() : ViewModel() {
     val repository = MovieReviewRepository(MovieReviewFirestoreDatabase())
     fun addMovieReview(movieReview: MovieReview) {
         viewModelScope.launch {

@@ -104,7 +104,7 @@ class MoviesSource {
 
             val response: JsonObject = client.get(fullUrl).body()
 
-            println("API RESPONSE: $response")
+            println("GENRES API RESPONSE: $response")
 
             response["results"]?.jsonArray?.map { jsonElement ->
                 val obj = jsonElement.jsonObject
@@ -149,6 +149,7 @@ class MoviesSource {
             null
         }
     }
+
     suspend fun getListofGenres(movieId: String): String? {
         val url = "$TMDB_BASE_URL/movie/$movieId/videos?api_key=$TMDB_API_KEY"
 
@@ -173,4 +174,29 @@ class MoviesSource {
         }
     }
 
+    suspend fun getMovieReviews(movieId: String): List<Pair<String, String>>? {
+        val url = "$TMDB_BASE_URL/movie/$movieId/reviews?api_key=$TMDB_API_KEY"
+
+        return try {
+            val response: JsonObject = client.get(url).body()
+            val results = response["results"]?.jsonArray ?: return null
+
+            // Extract the author and content from each review
+            results.mapNotNull { review ->
+                val author = review.jsonObject["author"]?.jsonPrimitive?.content
+                val content = review.jsonObject["content"]?.jsonPrimitive?.content
+
+                // Only include reviews with both author and content
+                if (author != null && content != null) {
+                    // Return a Pair with author and content
+                    Pair(author, content)
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            println("Error fetching movie reviews: ${e.localizedMessage}")
+            null
+        }
+    }
 }

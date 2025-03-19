@@ -1,7 +1,6 @@
 package com.example.flickpicks.ui.screens
 
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,26 +22,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.flickpicks.data.model.UserProfile
-import com.example.flickpicks.ui.viewmodels.MainViewModel
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUp(navController: NavController) {
-    // Get the MainViewModel instance
-    val userProfileViewModel = viewModel<UserProfileViewModel>(
-        viewModelStoreOwner = LocalContext.current as ComponentActivity
-    )
-
+fun SignUp(
+    navController: NavController,
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+) {
     // Field values
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }

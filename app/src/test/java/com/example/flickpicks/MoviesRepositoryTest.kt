@@ -96,4 +96,51 @@ class MoviesRepositoryTest {
         Assertions.assertEquals(1, result.size)
         Assertions.assertEquals("Movie A", result[0].title)
     }
+
+    @Test
+    fun getMovieTrailer() = runBlocking {
+        val trailerUrl = "https://youtube.com/trailer123"
+        `when`(moviesSource.getMovieTrailer("1")).thenReturn(trailerUrl)
+
+        val result = moviesRepository.getMovieTrailer("1")
+
+        Assertions.assertNotNull(result)
+        Assertions.assertEquals(trailerUrl, result)
+    }
+
+    @Test
+    fun getMovieTrailer_NoTrailerAvailable() = runBlocking {
+        `when`(moviesSource.getMovieTrailer("1")).thenReturn(null)
+
+        val result = moviesRepository.getMovieTrailer("1")
+
+        Assertions.assertNull(result)
+    }
+
+    @Test
+    fun getMovieReviews() = runBlocking {
+        val reviews = listOf(
+            Pair("Alice", "Great movie!"),
+            Pair("Bob", "Not bad."),
+            Pair("Charlie", "Loved it!")
+        )
+        `when`(moviesSource.getMovieReviews("1")).thenReturn(reviews)
+
+        val result = moviesRepository.getMovieReviews("1")
+
+        Assertions.assertNotNull(result)
+        Assertions.assertEquals(3, result?.size)
+        Assertions.assertEquals("Alice", result?.get(0)?.first)
+        Assertions.assertEquals("Great movie!", result?.get(0)?.second)
+    }
+
+    @Test
+    fun getMovieReviews_NoReviews() = runBlocking {
+        `when`(moviesSource.getMovieReviews("1")).thenReturn(emptyList())
+
+        val result = moviesRepository.getMovieReviews("1")
+
+        Assertions.assertNotNull(result)
+        Assertions.assertTrue(result!!.isEmpty())
+    }
 }

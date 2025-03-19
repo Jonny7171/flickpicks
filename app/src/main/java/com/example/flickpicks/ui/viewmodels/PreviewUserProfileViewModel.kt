@@ -5,8 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class PreviewUserProfileViewModel : ViewModel() {
+@HiltViewModel
+class PreviewUserProfileViewModel @Inject constructor() : ViewModel() {
     private val _userProfile = mutableStateOf<UserProfile?>(null)
     val userProfile: State<UserProfile?> = _userProfile
 
