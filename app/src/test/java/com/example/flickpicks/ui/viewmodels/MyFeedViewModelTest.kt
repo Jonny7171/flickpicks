@@ -1,25 +1,33 @@
 package com.example.flickpicks.ui.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.GENRE_MAP
 import com.example.flickpicks.data.model.Movie
+import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.UserProfile
+import com.example.flickpicks.data.repository.MovieReviewRepository
 import com.example.flickpicks.data.repository.MoviesRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.whenever
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,12 +45,15 @@ class MyFeedViewModelTest {
     @Mock
     private lateinit var userProfileRepository: UserProfileRepository
 
+    @Mock
+    private lateinit var reviewRepository: MovieReviewRepository
+
     private lateinit var viewModel: MyFeedViewModel
 
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = MyFeedViewModel(moviesRepository, userProfileRepository)
+        viewModel = MyFeedViewModel(moviesRepository, userProfileRepository, reviewRepository)
     }
 
     @AfterEach
@@ -59,10 +70,10 @@ class MyFeedViewModelTest {
 
         `when`(moviesRepository.getTrendingMovies()).thenReturn(movies)
 
-        viewModel = MyFeedViewModel(moviesRepository, userProfileRepository)
+        viewModel = MyFeedViewModel(moviesRepository, userProfileRepository, reviewRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        Assertions.assertEquals(movies, viewModel.trendingMovies.value)
+        assertEquals(movies, viewModel.trendingMovies.value)
     }
 
     @Test
@@ -84,8 +95,8 @@ class MyFeedViewModelTest {
 
         println("Recommended Movies: ${viewModel.recommendedMovies.value}")
 
-        Assertions.assertEquals(1, viewModel.recommendedMovies.value.size)
-        Assertions.assertEquals("Movie A", viewModel.recommendedMovies.value[0].title)
+        assertEquals(1, viewModel.recommendedMovies.value.size)
+        assertEquals("Movie A", viewModel.recommendedMovies.value[0].title)
     }
 
     @Test
@@ -140,7 +151,7 @@ class MyFeedViewModelTest {
         viewModel.getMovieDetails(movieId)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        Assertions.assertEquals(movie, viewModel.selectedMovie.value)
+        assertEquals(movie, viewModel.selectedMovie.value)
     }
 
     @Test
@@ -153,37 +164,107 @@ class MyFeedViewModelTest {
         viewModel.fetchWatchProviders(movieId)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        Assertions.assertEquals(providers, viewModel.watchProviders.value)
+        assertEquals(providers, viewModel.watchProviders.value)
     }
 
-//    @Test
-//    fun `fetchReviewedByFriends should update moviesReviewedByFriends state`() = runTest {
-//        val userId = "user1"
-//        val friendId = "friend1"
-//
-//        val review = MovieReview(
-//            movieId = "1",
-//            movieTitle = "Movie A",
-//            release_date = "2024-01-01",
-//            tagline = "",
-//            overview = "Overview A",
-//            genres = listOf("Action"),
-//            reviewerName = "Friend",
-//            reviewText = "Amazing movie!",
-//            rating = 5,
-//            streamingPlatform = "Netflix"
-//        )
-//
-//        val userProfile = UserProfile(userId, "User", "", "", "", "", "")
-//        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", "")
-//
-//        `when`(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
-//        `when`(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)
-//
-//        viewModel.fetchReviewedByFriends(userId)
-//        testDispatcher.scheduler.advanceUntilIdle()
-//
-//        Assertions.assertEquals(1, viewModel.moviesReviewedByFriends.value.size)
-//        Assertions.assertEquals("Movie A", viewModel.moviesReviewedByFriends.value[0].movieTitle)
-//    }
+    @Test
+    fun `fetchReviewedByFriends should update moviesReviewedByFriends state`() = runTest {
+        val userId = "user1"
+        val friendId = "friend1"
+
+        val review = MovieReview(
+            id = 1,
+            movieId = "1",
+            movieTitle = "Movie A",
+            release_date = "2024-01-01",
+            tagline = "",
+            overview = "Overview A",
+            genres = listOf("Action"),
+            reviewerName = "Friend",
+            reviewText = "Amazing movie!",
+            rating = 5,
+            streamingPlatform = "Netflix"
+        )
+
+        val userFriend = Friend(userId, "")
+        val friendFriend = Friend(friendId, "")
+
+        val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf(friendFriend))
+        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf(userFriend) )
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+        whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)
+
+        viewModel.fetchReviewedByFriends(userId)
+        advanceUntilIdle() // Ensures coroutine execution
+
+        assertEquals(1, viewModel.moviesReviewedByFriends.value.size)
+        assertEquals("Movie A", viewModel.moviesReviewedByFriends.value[0].movieTitle)
+    }
+
+    @Test
+    fun `postReview should add new review if no existing review`() = runTest {
+        val userId = "user1"
+        val movieId = "1"
+        val rating = "4"
+        val reviewText = "Great movie!"
+        val whereWatched = "Netflix"
+
+        val movie = Movie(
+            movieId, "Movie A", "2024-01-01", "", "Overview A", listOf("Action"),
+            poster_path = "",
+            vote_average = "",
+            trailer = ""
+        )
+        val userProfile = UserProfile(userId, "User", "", "", "", "")
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+        whenever(moviesRepository.getMovieDetails(movieId)).thenReturn(movie)
+
+        viewModel.postReview(userId, movieId, rating, reviewText, whereWatched)
+        advanceUntilIdle()
+
+        verify(reviewRepository).addMovieReview(argThat { review ->
+            assertEquals(0, review.id)
+            assertEquals("Movie A", review.movieTitle)
+            assertEquals(4, review.rating)
+            true
+        })
+    }
+
+    @Test
+    fun `postReview should update existing review instead of creating a new one`() = runTest {
+        val userId = "user1"
+        val movieId = "1"
+        val rating = "5"
+        val reviewText = "Even better on second watch!"
+        val whereWatched = "Netflix"
+
+        val movie = Movie(
+            movieId, "Movie A", "2024-01-01", "", "Overview A", listOf("Action"),
+            poster_path = "",
+            vote_average = "",
+            trailer = ""
+        )
+        val existingReview = MovieReview(
+            id = 1, movieId = movieId, movieTitle = "Movie A", release_date = "2024-01-01",
+            tagline = "", overview = "Overview A", genres = listOf("Action"), reviewerName = "User",
+            reviewText = "Good movie!", rating = 4, streamingPlatform = "Netflix"
+        )
+        val userProfile = UserProfile(userId, "User", "", "", "", "", moviesReviewed = mutableListOf(existingReview))
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+        whenever(moviesRepository.getMovieDetails(movieId)).thenReturn(movie)
+
+        viewModel.postReview(userId, movieId, rating, reviewText, whereWatched)
+        advanceUntilIdle()
+
+        verify(reviewRepository).deleteMovieReview(existingReview.id)
+        verify(reviewRepository).addMovieReview(argThat { review ->
+            assertEquals(1, review.id)
+            assertEquals("Movie A", review.movieTitle)
+            assertEquals(5, review.rating)
+            true
+        })
+    }
 }

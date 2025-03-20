@@ -219,6 +219,8 @@ fun AddReviewTab(
     var rating by remember { mutableStateOf("") }
     var comment by remember { mutableStateOf("") }
     var streamingPlatform by remember { mutableStateOf("") }
+    var postReviewText by remember { mutableStateOf("Post Review") }
+    var isButtonEnabled by remember { mutableStateOf(true) }
 
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
@@ -254,13 +256,16 @@ fun AddReviewTab(
         Button(
             onClick = {
                 currentUser?.let { viewModel.postReview(it.id, movieId, rating, comment, streamingPlatform) }
+                postReviewText = "Review Posted"
                 rating = ""
                 comment = ""
                 streamingPlatform = ""
+                isButtonEnabled = false
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = isButtonEnabled
         ) {
-            Text(text = "Post Review")
+            Text(text = postReviewText)
         }
     }
 }

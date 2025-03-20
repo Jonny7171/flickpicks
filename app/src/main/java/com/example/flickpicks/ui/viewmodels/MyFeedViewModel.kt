@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.GENRE_MAP
 import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.MovieReview
+import com.example.flickpicks.data.repository.MovieReviewRepository
 import com.example.flickpicks.data.repository.MoviesRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,10 +15,14 @@ import kotlin.collections.Map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+var reviewIdsMap = mutableMapOf<Int, Boolean>()
+var currReviewId = 0
+
 @HiltViewModel
 class MyFeedViewModel @Inject constructor(
     private val repository: MoviesRepository,
-    private val userRepository: UserProfileRepository
+    private val userRepository: UserProfileRepository,
+    private val reviewRepository: MovieReviewRepository
 ) : ViewModel() {
 
     private val _trendingMovies = mutableStateOf<List<Movie>>(emptyList())
@@ -53,13 +58,13 @@ class MyFeedViewModel @Inject constructor(
     fun fetchReviewedByFriends(userId: String) {
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
-            val friends = userProfile?.following ?: emptyList()
+            val friends = userProfile?.followers ?: emptyList()
 
             val friendReviews = mutableListOf<MovieReview>()
             for (friendId in friends) {
                 val friendProfile = userRepository.getUserProfile(friendId.id)
                 friendProfile?.moviesReviewed?.forEach { review ->
-//                    friendReviews.add(review)
+                    friendReviews.add(review)
                 }
             }
 
@@ -151,8 +156,22 @@ class MyFeedViewModel @Inject constructor(
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
             val movie = repository.getMovieDetails(movieId)
+
             userProfile?.let {
+                val existingReview = it.moviesReviewed.find { review -> review.movieId == movieId }
+                val reviewId: Int
+
+                if (existingReview != null) {
+                    reviewId = existingReview.id
+                    reviewRepository.deleteMovieReview(existingReview.id)
+                } else {
+                    reviewId = currReviewId
+                    reviewIdsMap[reviewId] = true
+                    currReviewId++
+                }
+
                 val newReview = MovieReview(
+                    id = reviewId,
                     movieId = movieId,
                     movieTitle = movie.title ?: "",
                     release_date = movie.release_date ?: "",
@@ -164,16 +183,13 @@ class MyFeedViewModel @Inject constructor(
                     rating = rating.toIntOrNull() ?: 0,
                     streamingPlatform = whereWatched
                 )
-
                 val updatedReviews = it.moviesReviewed.toMutableList().apply {
-                    // Check if the movie review already exists; if so, remove it
-                    val existingReview = find { review -> review.movieId == movieId }
                     if (existingReview != null) {
                         remove(existingReview)
                     }
-                    // Add the new review
                     add(newReview)
                 }
+                reviewRepository.addMovieReview(newReview)
                 userRepository.updateUserProfile(it.id, mapOf("moviesReviewed" to updatedReviews))
             }
         }
