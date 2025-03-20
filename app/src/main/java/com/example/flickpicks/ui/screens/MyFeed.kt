@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -141,6 +142,7 @@ fun MyFeed(
     LaunchedEffect(currentUser) {
         currentUser?.let {
             viewModel.fetchReviewedByFriends(it.id)
+            viewModel.fetchReviewedByFriends(it.id)
             viewModel.fetchRecommendedMovies(it.id)
         }
     }
@@ -187,7 +189,7 @@ fun MyFeed(
                 MoviesFeedScreen(navController, trendingMovies)
             }
             "Reviewed By Friends" -> {
-                ReviewsFeedScreen(navController, mockReviews)
+                ReviewsFeedScreen(navController, reviewedByFriends)
             }
             else -> {
                 MoviesFeedScreen(navController, recommendations)
@@ -209,6 +211,20 @@ fun MoviesFeedScreen(navController: NavController, movies: List<Movie>) {
 
 @Composable
 fun ReviewsFeedScreen(navController: NavController, reviews: List<MovieReview>) {
+    if (reviews.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Reviews From Friends Yet",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        return
+    }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(reviews) { review ->
             ReviewItem(review, onClick = {

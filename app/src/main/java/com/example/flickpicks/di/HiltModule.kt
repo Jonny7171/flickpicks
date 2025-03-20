@@ -1,5 +1,7 @@
 package com.example.flickpicks.di
 
+import com.example.flickpicks.data.repository.MovieReviewDatabase
+import com.example.flickpicks.data.repository.MovieReviewFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileDatabase
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.source.MoviesSource
@@ -23,5 +25,11 @@ object HiltModule {
     @Singleton
     fun provideUserProfileDatabase(): UserProfileDatabase {
         return UserProfileFirestoreDatabase()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMovieReviewDatabase(): MovieReviewDatabase {
+        return MovieReviewFirestoreDatabase()
     }
 }
