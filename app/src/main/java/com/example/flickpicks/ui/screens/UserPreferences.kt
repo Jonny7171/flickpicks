@@ -77,7 +77,7 @@ fun UserPreferences(
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Title + scrollable list of genres
+        // Title + scrollable list
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -125,7 +125,7 @@ fun UserPreferences(
             }
         }
 
-        // Error message + button
+        // Error
         Column {
             if (errorMessage.isNotEmpty()) {
                 Text(

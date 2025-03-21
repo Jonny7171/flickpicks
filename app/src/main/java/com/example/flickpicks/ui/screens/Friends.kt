@@ -35,7 +35,7 @@ fun Friends(
     val currentUser = userProfileViewModel.userProfile.value
     val auth = FirebaseAuth.getInstance()
 
-    // Ensure the current user's profile is fetched (using the same instance)
+    // Ensure the current user's profile is fetched
     LaunchedEffect(key1 = auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null && currentUser == null) {
@@ -77,7 +77,7 @@ fun Friends(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Tab Buttons: "Friends" and "Requests"
+                // Tab's "Friends" and "Requests"
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -104,7 +104,6 @@ fun Friends(
                 Spacer(modifier = Modifier.height(8.dp))
                 when (selectedTab) {
                     "Friends" -> {
-                        // Use followers as friends; pass a callback for removal.
                         FriendsList(
                             friends = currentUser.followers,
                             onRemove = { friendId ->
@@ -208,7 +207,7 @@ fun FriendRequestItem(
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
-    // Asynchronously load the username for the friend request using produceState.
+    // load usernames
     val userName by produceState(initialValue = "Loading...", key1 = requestUserId) {
         val repository = UserProfileRepository(UserProfileFirestoreDatabase())
         val profile = try {
