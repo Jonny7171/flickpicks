@@ -14,4 +14,6 @@ data class Movie (
     val vote_average: String,
     val trailer: String?
 )
-
+{
+    constructor() : this("", "", "", "", "", emptyList(), "", "", null)
+}

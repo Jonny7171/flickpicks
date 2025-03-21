@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -42,6 +43,7 @@ import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.UserSearchScreen
 import com.example.flickpicks.ui.screens.Entry
 import com.example.flickpicks.ui.screens.Friends
+import com.example.flickpicks.ui.screens.MemberSearchScreen
 import com.example.flickpicks.ui.screens.MovieDetailScreen
 import com.example.flickpicks.ui.screens.MyFeed
 import com.example.flickpicks.ui.screens.Party
@@ -57,6 +59,7 @@ import com.example.flickpicks.ui.screens.UserPreferences
 import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
 import com.example.flickpicks.ui.theme.GreenJC
+import com.example.flickpicks.ui.viewmodels.AddMemberViewModel
 import com.example.flickpicks.ui.viewmodels.GenreViewModel
 import com.example.flickpicks.ui.viewmodels.MovieReviewViewModel
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
@@ -315,13 +318,24 @@ fun BottomNavigationBar() {
             composable(Screens.Settings.screen) {
                 Settings(navController = navigationController)
             }
-            composable(Screens.PartyGroup.screen) {
-                PartyGroup(navController = navigationController)
+            composable(Screens.PartyGroup.screen + "/{groupId}") { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull() ?: 0
+                PartyGroup(navController = navigationController, groupId)
             }
-            composable(Screens.PartyGroupChat.screen) {
-                val sharedViewModel = remember { PartyGroupViewModel() }
-                ChatScreen(navigationController, sharedViewModel)
 
+            composable(Screens.PartyGroupChat.screen + "/{groupId}") { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
+                if (groupId != null) {
+                    val partyGroupViewModel: PartyGroupViewModel = hiltViewModel()
+                    ChatScreen(navController = navigationController, viewModel = partyGroupViewModel, groupId = groupId)
+                }
+            }
+            composable(Screens.MemberSearch.screen) { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
+                if (groupId != null) {
+                    val addMemberViewModel: AddMemberViewModel = hiltViewModel()
+                    MemberSearchScreen(navController = navigationController, groupId = groupId, addMemberViewModel)
+                }
             }
 
             composable(Screens.MovieDetail.screen) { backStackEntry ->
