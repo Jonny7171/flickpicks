@@ -52,6 +52,7 @@ fun Profile(
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
 
+
     // Fetch user profile when screen is loaded
     LaunchedEffect(userId) {
         userId?.let { userProfileViewModel.fetchUserProfile(it) }

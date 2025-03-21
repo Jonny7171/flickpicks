@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,23 +23,34 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 
 @Composable
-fun PartyGroup(navController: NavController){
+fun PartyGroup(navController: NavController, groupId: Int, viewModel: PartyGroupViewModel = hiltViewModel()){
     var selectedTab by remember {mutableStateOf(0)}
-    var tabTitles = listOf("Past Movies", "Schedule Time", "Movie Recs")
+    val tabTitles = listOf("Schedule Time", "Movie Recs")
+
+    val partyGroup by viewModel.partyGroup.collectAsState()
+    LaunchedEffect(groupId) {
+        viewModel.loadPartyGroup(groupId)
+
+    }
 
 
+    //val partyGroup by viewModel.getPartyGroup(groupId).collectAsState(initial = null)
     Column(modifier = Modifier.fillMaxSize()
         .padding(8.dp)) {
         Row(
@@ -52,37 +64,19 @@ fun PartyGroup(navController: NavController){
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon( imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-            Text(text="Charlie's Angels", style = MaterialTheme.typography.titleLarge)
+            Text(text=partyGroup?.groupName ?: "Loading...", style = MaterialTheme.typography.titleLarge)
+
+
+            IconButton(onClick = { navController.navigate(Screens.MemberSearch.createRoute(groupId.toString())) }) {
+                Icon(imageVector = Icons.Default.Person, contentDescription = "Show Members")
+            }
+
 
         }
 
         Spacer(modifier= Modifier.height(8.dp))
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        /*
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
 
-        ){
-
-            Text(
-                text= "Past Movies",
-                modifier = Modifier.padding(8.dp)
-                .clickable {  }
-            )
-            Text(
-                text= "Schedule Time",
-                modifier = Modifier.padding(8.dp)
-                    .clickable {  }
-            )
-            Text(
-                text= "Movie Recs",
-                modifier = Modifier.padding(8.dp)
-                .clickable {  }
-            )
-            */
 
         TabRow(selectedTabIndex = selectedTab) {
             tabTitles.forEachIndexed { idx, title ->
@@ -98,69 +92,89 @@ fun PartyGroup(navController: NavController){
         }
 
         when (selectedTab) {
-            0 -> PastMoviesTab()
-            1 -> ScheduleTimeTab(PartyGroupViewModel())
-            2 -> MovieRecsTab()
+            0 -> ScheduleTimeTab(PartyGroupViewModel(), groupId)
+            1 -> MovieRecsTab()
         }
 
     }
 
 }
 
+
 @Composable
-fun ScheduleTimeTab(viewModel: PartyGroupViewModel) {
-    val availableTimes = listOf("6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM")
-    var bestTime by remember { mutableStateOf<String?>(null) }
+fun ScheduleTimeTab(viewModel: PartyGroupViewModel, groupId: Int) {
+    val selectedDays by viewModel.selectedDays.collectAsState()
+    val selectedTimes by viewModel.selectedTimes.collectAsState()
+    var bestTime by remember { mutableStateOf("Click to Find Best Time") }
+    val daysOfWeek = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    val timeSlots = (1..12).map { "$it:00 AM" } + listOf("12:00 PM") + (1..11).map { "$it:00 PM" } + listOf("12:00 AM")
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Text("Select Available Times", fontSize = 20.sp, modifier = Modifier.padding(8.dp))
+    LaunchedEffect(groupId) {
+        viewModel.loadPartyGroup(groupId)
+        viewModel.findBestTime(groupId) { time -> bestTime = time }
+    }
 
-        LazyColumn {
-            items(availableTimes) { time ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            viewModel.selectTime(time)
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+        Text(text = "Select Available Days", fontSize = 20.sp, modifier = Modifier.padding(bottom = 8.dp))
+
+
+        Column(modifier = Modifier.weight(1f)) {
+            LazyColumn {
+                items(daysOfWeek) { day ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable { viewModel.toggleDaySelection(groupId, day) },
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(day, fontSize = 18.sp)
+                        if (selectedDays.contains(day)) {
+                            Text("✔", fontSize = 18.sp, color = Color.Blue)
                         }
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(time, fontSize = 16.sp)
-                    if (viewModel.selectedTimes.contains(time)) {
-                        Text("✔")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Select Available Times", fontSize = 20.sp, modifier = Modifier.padding(bottom = 8.dp))
+
+            LazyColumn {
+                items(timeSlots) { time ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable { viewModel.toggleTimeSelection(groupId, time) },
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(time, fontSize = 18.sp)
+                        if (selectedTimes.contains(time)) {
+                            Text("✔", fontSize = 18.sp, color = Color.Blue)
+                        }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         Button(
-            onClick = { bestTime = findBestTime(viewModel.selectedTimes) },
+            onClick = { viewModel.findBestTime(groupId) { bestTime = it } },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Find Best Time")
         }
 
-        bestTime?.let {
-            Text("Best Time: $it", fontSize = 18.sp, modifier = Modifier.padding(8.dp))
-        }
+        // Display Best Time
+        Text(text = bestTime, fontSize = 18.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
-fun findBestTime(selectedTimes: List<String>): String {
-    val timeFrequency = selectedTimes.groupingBy { it }.eachCount()
-    return timeFrequency.maxByOrNull { it.value }?.key ?: "No consensus"
-}
-
-
-@Composable
-fun PastMoviesTab() {
-    Column (modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Text("No Movies Watched Yet!", style = MaterialTheme.typography.titleMedium)
-    }
-}
 
 @Composable
 fun MovieRecsTab() {

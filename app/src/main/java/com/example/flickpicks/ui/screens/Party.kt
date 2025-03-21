@@ -32,7 +32,11 @@ import androidx.compose.material3.*
 import com.example.flickpicks.data.model.PartyGroup
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.flickpicks.data.model.Movie
+import com.example.flickpicks.ui.viewmodels.MyFeedViewModel
+import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 val mockGroups = listOf(
     PartyGroup(
@@ -95,11 +99,17 @@ val mockGroups = listOf(
 )
 
 @Composable
-fun Party(navController: NavController){
-    var userMadeGroups by remember {mutableStateOf(mockGroups.toMutableList())}
+fun Party(navController: NavController, viewModel: PartyGroupViewModel = hiltViewModel()){
+    //var userMadeGroups by remember {mutableStateOf(mockGroups.toMutableList())}
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
     var newGroupName by remember {mutableStateOf("")}
     var showDialog by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        userId?.let {viewModel.loadUserPartyGroups(it)}
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -110,7 +120,7 @@ fun Party(navController: NavController){
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(text = "Movie Party", fontSize = 24.sp)
+            Text(text = "My Movie Parties", fontSize = 24.sp)
 
             Button(onClick = {},
                 modifier = Modifier.size(40.dp),
@@ -125,8 +135,9 @@ fun Party(navController: NavController){
         }
 
         Spacer(modifier=Modifier.height(8.dp))
-        ShowGroups(userMadeGroups, navController, onDelete = { group ->
-            userMadeGroups = userMadeGroups.filter{it.id != group.id }.toMutableStateList()
+        ShowGroups(viewModel.userPartyGroups, navController, onDelete = { group ->
+            viewModel.deletePartyGroup(group)
+            viewModel.loadUserPartyGroups(userId ?: "") // Refresh the list after deletion
         })
 
         if (showDialog) {
@@ -154,9 +165,9 @@ fun Party(navController: NavController){
                         onClick = {
                             if (newGroupName.isNotBlank()) {
                                 val newGroup = PartyGroup(
-                                    id = userMadeGroups.size + 1,
+                                    id = viewModel.userPartyGroups.size + 1,
                                     groupName = newGroupName,
-                                    members = mutableListOf(), // Empty list for members
+                                    members = mutableListOf(userId ?: ""), // Empty list for members
                                     timesAvailable = mutableMapOf(), // Empty map for availability
                                     winnerMovie = Movie( // Provide a placeholder movie
                                         id = "0",
@@ -172,7 +183,12 @@ fun Party(navController: NavController){
                                     pastWatchedMovies = mutableListOf(), // Empty list for past movies
                                     chatMessages = mutableListOf() // Empty list for chat messages
                                 )
-                                userMadeGroups = (userMadeGroups + newGroup).toMutableList()
+                                //userMadeGroups = (userMadeGroups + newGroup).toMutableList()
+                                if (userId != null) {
+                                    viewModel.addPartyGroup(newGroup, userId)
+                                } else {
+                                    viewModel.addPartyGroup(newGroup, "")
+                                }
                                 newGroupName = ""
                                 showDialog = false
                             } else {
@@ -211,7 +227,7 @@ fun ShowGroups(groups: List<PartyGroup>, navController: NavController, onDelete:
 
                         detectTapGestures(
                             onTap = {
-                                navController.navigate(Screens.PartyGroup.screen)
+                                navController.navigate(Screens.PartyGroup.screen + "/${group.id}")
                             },
                             onLongPress = {
                                 showDeleteDialog = group
@@ -235,7 +251,7 @@ fun ShowGroups(groups: List<PartyGroup>, navController: NavController, onDelete:
                             fontSize = 16.sp,
                             modifier = Modifier.weight(1f)
                         )
-                        Button(onClick = { navController.navigate(Screens.PartyGroupChat.screen)} ) {
+                        Button(onClick = { navController.navigate(Screens.PartyGroupChat.screen + "/${group.id}")} ) {
                             Text(text = "Send Message")
                         }
 
