@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
@@ -64,23 +63,15 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
     fun acceptFriendRequest(requestUserId: String) {
         viewModelScope.launch {
             val current = _userProfile.value ?: return@launch
-            // Create new copies of lists to force recomposition:
-            val newIncoming = current.incomingRequests.toMutableList().apply {
-                remove(requestUserId)
-            }
+            val newIncoming = current.incomingRequests.toMutableList()
+            newIncoming.remove(requestUserId)
             val otherUser = repository.getUserProfile(requestUserId) ?: return@launch
-            val newOutgoing = otherUser.outgoingRequests.toMutableList().apply {
-                remove(current.id)
-            }
-            // Update followers lists immutably:
-            val newFollowersForCurrent = current.followers.toMutableList().apply {
-                add(Friend(requestUserId, otherUser.userName))
-            }
-            val newFollowersForOther = otherUser.followers.toMutableList().apply {
-                add(Friend(current.id, current.userName))
-            }
-
-            // Update Firestore for both users
+            val newOutgoing = otherUser.outgoingRequests.toMutableList()
+            newOutgoing.remove(current.id)
+            val newFollowersForCurrent = current.followers.toMutableList()
+            newFollowersForCurrent.add(requestUserId)
+            val newFollowersForOther = otherUser.followers.toMutableList()
+            newFollowersForOther.add(current.id)
             repository.updateUserProfile(current.id, mapOf(
                 "incomingRequests" to newIncoming,
                 "followers" to newFollowersForCurrent
@@ -89,8 +80,6 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
                 "outgoingRequests" to newOutgoing,
                 "followers" to newFollowersForOther
             ))
-
-            // Update local state using a new copy of currentUser
             _userProfile.value = current.copy(
                 incomingRequests = newIncoming,
                 followers = newFollowersForCurrent
@@ -101,14 +90,11 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
     fun declineFriendRequest(requestUserId: String) {
         viewModelScope.launch {
             val current = _userProfile.value ?: return@launch
-            val newIncoming = current.incomingRequests.toMutableList().apply {
-                remove(requestUserId)
-            }
+            val newIncoming = current.incomingRequests.toMutableList()
+            newIncoming.remove(requestUserId)
             val otherUser = repository.getUserProfile(requestUserId) ?: return@launch
-            val newOutgoing = otherUser.outgoingRequests.toMutableList().apply {
-                remove(current.id)
-            }
-            // Update Firestore for both users
+            val newOutgoing = otherUser.outgoingRequests.toMutableList()
+            newOutgoing.remove(current.id)
             repository.updateUserProfile(current.id, mapOf(
                 "incomingRequests" to newIncoming
             ))
@@ -125,16 +111,12 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
         viewModelScope.launch {
             val current = _userProfile.value ?: return@launch
             val newFollowers = current.followers
-                .filterNot { it.id == friendId }
+                .filterNot { it == friendId }
                 .toMutableList()
-
-            // Get the friend profile
             val friendProfile = repository.getUserProfile(friendId) ?: return@launch
             val newFriendFollowers = friendProfile.followers
-                .filterNot { it.id == current.id }
+                .filterNot { it == current.id }
                 .toMutableList()
-
-            // Update Firestore for both users
             repository.updateUserProfile(current.id, mapOf("followers" to newFollowers))
             repository.updateUserProfile(friendId, mapOf("followers" to newFriendFollowers))
             _userProfile.value = current.copy(
@@ -142,11 +124,8 @@ class UserProfileViewModel @Inject constructor(): ViewModel() {
             )
         }
     }
+
     fun setPreviewProfile(profile: UserProfile) {
         _userProfile.value = profile
     }
 }
-
-
-
-

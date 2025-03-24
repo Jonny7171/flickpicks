@@ -2,6 +2,7 @@ package com.example.flickpicks.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -27,15 +27,15 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun Friends(
     navController: NavController,
-    userProfileViewModel: UserProfileViewModel = viewModel()
+    userProfileViewModel: UserProfileViewModel = viewModel() // Real ViewModel provided by Hilt
 ) {
-    // Observe the user profile as state
+    // Observe the user profile state
     val currentUserState = userProfileViewModel.userProfile
     val currentUser = currentUserState.value
 
     val auth = FirebaseAuth.getInstance()
 
-    // Fetch the current user profile if needed
+    // Ensure the current user's profile is fetched
     LaunchedEffect(auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null && currentUser == null) {
@@ -105,17 +105,15 @@ fun Friends(
 
                 when (selectedTab) {
                     "Friends" -> {
-                        // Reread the latest friend list from the user profile
-                        val updatedFriends = currentUser.followers
+                        val updatedFriendIds = currentUser.followers
                         FriendsList(
-                            friends = updatedFriends,
+                            friendIds = updatedFriendIds,
                             onRemove = { friendId ->
                                 userProfileViewModel.removeFriend(friendId)
                             }
                         )
                     }
                     "Requests" -> {
-                        // Re-read the latest incoming requests
                         val updatedRequests = currentUser.incomingRequests
                         RequestsList(
                             incomingRequests = updatedRequests,
@@ -135,10 +133,10 @@ fun Friends(
 
 @Composable
 fun FriendsList(
-    friends: List<Friend>,
+    friendIds: List<String>,
     onRemove: (String) -> Unit
 ) {
-    if (friends.isEmpty()) {
+    if (friendIds.isEmpty()) {
         Text(
             text = "No friends found.",
             fontSize = 18.sp,
@@ -146,15 +144,30 @@ fun FriendsList(
         )
     } else {
         LazyColumn(modifier = Modifier.padding(8.dp)) {
-            items(friends) { friend ->
-                FriendItem(friend = friend, onRemove = { onRemove(friend.id) })
+            items(friendIds) { friendId ->
+                val friendName by produceState(initialValue = "Loading...", key1 = friendId) {
+                    val repository = com.example.flickpicks.data.repository.UserProfileRepository(
+                        com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
+                    )
+                    val profile = try {
+                        repository.getUserProfile(friendId)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    value = profile?.userName ?: "Unknown"
+                }
+                FriendItem(friendId = friendId, friendName = friendName, onRemove = onRemove)
             }
         }
     }
 }
 
 @Composable
-fun FriendItem(friend: Friend, onRemove: () -> Unit) {
+fun FriendItem(
+    friendId: String,
+    friendName: String,
+    onRemove: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,11 +184,11 @@ fun FriendItem(friend: Friend, onRemove: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = friend.userName,
+            text = friendName,
             fontSize = 16.sp,
             modifier = Modifier.weight(1f)
         )
-        Button(onClick = onRemove) {
+        Button(onClick = { onRemove(friendId) }) {
             Text("Remove")
         }
     }
@@ -198,8 +211,8 @@ fun RequestsList(
             items(incomingRequests) { requestUserId ->
                 FriendRequestItem(
                     requestUserId = requestUserId,
-                    onAccept = { onAccept(requestUserId) },
-                    onDecline = { onDecline(requestUserId) }
+                    onAccept = onAccept,
+                    onDecline = onDecline
                 )
             }
         }

@@ -59,10 +59,10 @@ class MyFeedViewModel @Inject constructor(
         viewModelScope.launch {
             val userProfile = userRepository.getUserProfile(userId)
             val friends = userProfile?.followers ?: emptyList()
-
             val friendReviews = mutableListOf<MovieReview>()
+
             for (friendId in friends) {
-                val friendProfile = userRepository.getUserProfile(friendId.id)
+                val friendProfile = userRepository.getUserProfile(friendId)
                 friendProfile?.moviesReviewed?.forEach { review ->
                     friendReviews.add(review)
                 }
