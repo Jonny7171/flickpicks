@@ -2,27 +2,11 @@ package com.example.flickpicks.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,15 +19,40 @@ fun UserPreferences(
     navController: NavController,
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+    val currentUserProfile = userProfileViewModel.userProfile.value
 
+    // If the user is not logged in, we can't proceed
+    if (userId == null) {
+        Text("You must be logged in to set preferences.")
+        return
+    }
+
+    // If the profile isn't loaded yet
+    LaunchedEffect(userId) {
+        if (currentUserProfile == null) {
+            userProfileViewModel.fetchUserProfile(userId)
+        }
+    }
+
+    // genres from API
     val commonGenres = listOf(
         "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
         "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery",
         "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
     )
 
-    // Track which genres are selected
+    // Track selected genres
     val selectedGenres = remember { mutableStateListOf<String>() }
+    var hasPopulated by remember { mutableStateOf(false) }
+
+    // prepopulate
+    if (currentUserProfile != null && !hasPopulated) {
+        selectedGenres.clear()
+        selectedGenres.addAll(currentUserProfile.genrePreferences)
+        hasPopulated = true
+    }
 
     var errorMessage by remember { mutableStateOf("") }
 
@@ -54,20 +63,11 @@ fun UserPreferences(
             return
         }
 
-        val auth = FirebaseAuth.getInstance()
-        val userId = auth.currentUser?.uid
+        // Update Firestore
+        userProfileViewModel.updateUserProfile(userId, mapOf("genrePreferences" to selectedGenres))
 
-        if (userId == null) {
-            errorMessage = "You must be logged in to select preferences"
-            return
-        }
-        val userProfile = userProfileViewModel.getUserProfile(userId)
-        Log.d("Firestore", "$userProfile")
-        userProfile.let {
-            userProfileViewModel.updateUserProfile(userId, mapOf("genrePreferences" to selectedGenres))
-            navController.navigate(Screens.MyFeed.screen) {
-                popUpTo(Screens.Entry.screen) { inclusive = true }
-            }
+        navController.navigate(Screens.MyFeed.screen) {
+            popUpTo(Screens.Entry.screen) { inclusive = true }
         }
     }
 
@@ -77,7 +77,6 @@ fun UserPreferences(
             .padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Title + scrollable list
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -125,7 +124,7 @@ fun UserPreferences(
             }
         }
 
-        // Error
+        // Error & "Complete" button
         Column {
             if (errorMessage.isNotEmpty()) {
                 Text(

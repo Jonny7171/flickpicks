@@ -2,6 +2,7 @@ package com.example.flickpicks.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,11 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.flickpicks.data.model.Friend
-import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
-import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
-import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,11 +29,14 @@ fun Friends(
     navController: NavController,
     userProfileViewModel: UserProfileViewModel = viewModel() // Real ViewModel provided by Hilt
 ) {
-    val currentUser = userProfileViewModel.userProfile.value
+    // Observe the user profile state
+    val currentUserState = userProfileViewModel.userProfile
+    val currentUser = currentUserState.value
+
     val auth = FirebaseAuth.getInstance()
 
     // Ensure the current user's profile is fetched
-    LaunchedEffect(key1 = auth.currentUser?.uid) {
+    LaunchedEffect(auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null && currentUser == null) {
             userProfileViewModel.fetchUserProfile(uid)
@@ -77,7 +77,7 @@ fun Friends(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Tab's "Friends" and "Requests"
+                // Tabs: "Friends" and "Requests"
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,18 +102,21 @@ fun Friends(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+
                 when (selectedTab) {
                     "Friends" -> {
+                        val updatedFriendIds = currentUser.followers
                         FriendsList(
-                            friends = currentUser.followers,
+                            friendIds = updatedFriendIds,
                             onRemove = { friendId ->
                                 userProfileViewModel.removeFriend(friendId)
                             }
                         )
                     }
                     "Requests" -> {
+                        val updatedRequests = currentUser.incomingRequests
                         RequestsList(
-                            incomingRequests = currentUser.incomingRequests,
+                            incomingRequests = updatedRequests,
                             onAccept = { requestUserId ->
                                 userProfileViewModel.acceptFriendRequest(requestUserId)
                             },
@@ -130,10 +133,10 @@ fun Friends(
 
 @Composable
 fun FriendsList(
-    friends: List<Friend>,
+    friendIds: List<String>,
     onRemove: (String) -> Unit
 ) {
-    if (friends.isEmpty()) {
+    if (friendIds.isEmpty()) {
         Text(
             text = "No friends found.",
             fontSize = 18.sp,
@@ -141,15 +144,30 @@ fun FriendsList(
         )
     } else {
         LazyColumn(modifier = Modifier.padding(8.dp)) {
-            items(friends) { friend ->
-                FriendItem(friend = friend, onRemove = { onRemove(friend.id) })
+            items(friendIds) { friendId ->
+                val friendName by produceState(initialValue = "Loading...", key1 = friendId) {
+                    val repository = com.example.flickpicks.data.repository.UserProfileRepository(
+                        com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
+                    )
+                    val profile = try {
+                        repository.getUserProfile(friendId)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    value = profile?.userName ?: "Unknown"
+                }
+                FriendItem(friendId = friendId, friendName = friendName, onRemove = onRemove)
             }
         }
     }
 }
 
 @Composable
-fun FriendItem(friend: Friend, onRemove: () -> Unit) {
+fun FriendItem(
+    friendId: String,
+    friendName: String,
+    onRemove: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,11 +184,11 @@ fun FriendItem(friend: Friend, onRemove: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = friend.userName,
+            text = friendName,
             fontSize = 16.sp,
             modifier = Modifier.weight(1f)
         )
-        Button(onClick = onRemove) {
+        Button(onClick = { onRemove(friendId) }) {
             Text("Remove")
         }
     }
@@ -193,8 +211,8 @@ fun RequestsList(
             items(incomingRequests) { requestUserId ->
                 FriendRequestItem(
                     requestUserId = requestUserId,
-                    onAccept = { onAccept(requestUserId) },
-                    onDecline = { onDecline(requestUserId) }
+                    onAccept = onAccept,
+                    onDecline = onDecline
                 )
             }
         }
@@ -204,12 +222,15 @@ fun RequestsList(
 @Composable
 fun FriendRequestItem(
     requestUserId: String,
-    onAccept: () -> Unit,
-    onDecline: () -> Unit
+    onAccept: (String) -> Unit,
+    onDecline: (String) -> Unit
 ) {
-    // load usernames
+    var isProcessing by remember { mutableStateOf(false) }
+
     val userName by produceState(initialValue = "Loading...", key1 = requestUserId) {
-        val repository = UserProfileRepository(UserProfileFirestoreDatabase())
+        val repository = com.example.flickpicks.data.repository.UserProfileRepository(
+            com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
+        )
         val profile = try {
             repository.getUserProfile(requestUserId)
         } catch (e: Exception) {
@@ -224,11 +245,29 @@ fun FriendRequestItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = onAccept, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = {
+                    if (!isProcessing) {
+                        isProcessing = true
+                        onAccept(requestUserId)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = !isProcessing
+            ) {
                 Text("Accept")
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = onDecline, modifier = Modifier.weight(1f)) {
+            Button(
+                onClick = {
+                    if (!isProcessing) {
+                        isProcessing = true
+                        onDecline(requestUserId)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = !isProcessing
+            ) {
                 Text("Decline")
             }
         }
