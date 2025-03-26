@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,11 +31,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.flickpicks.data.model.Genre
-import com.example.flickpicks.data.model.Movie
-import com.example.flickpicks.data.model.MovieReview
-import com.example.flickpicks.data.model.PartyGroup
-import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.screens.BlockedUsers
 import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
@@ -60,107 +54,19 @@ import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
 import com.example.flickpicks.ui.theme.GreenJC
 import com.example.flickpicks.ui.viewmodels.AddMemberViewModel
-import com.example.flickpicks.ui.viewmodels.GenreViewModel
-import com.example.flickpicks.ui.viewmodels.MovieReviewViewModel
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
-import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val userProfileViewModel: UserProfileViewModel by viewModels()
-    private val genreViewModel: GenreViewModel by viewModels()
-    private val partyGroupViewModel: PartyGroupViewModel by viewModels()
-    private val movieReviewViewModel: MovieReviewViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
         auth = FirebaseAuth.getInstance()
-
-        val sampleUser = UserProfile(
-            id = "13",
-            name = "Shaili Doe",
-            email = "Jim.doe@example.com",
-            userName = "jimdoe"
-        )
-
-        val sampleGenre = Genre(name = "Sad", count = 6)
-
-        val samplePartyGroup =
-            PartyGroup(
-                id = 5,
-                groupName = "CS Party",
-                members = mutableListOf(), // Empty list as placeholder
-                timesAvailable = mutableMapOf(), // Empty map as placeholder
-                winnerMovie = Movie( // Provide a sample Movie object
-                    id = "1",
-                    title = "Inception",
-                    release_date = "2010-07-16",
-                    overview = "A mind-bending thriller about dream invasion.",
-                    tagline = "Your mind is the scene of the crime.",
-                    genres = listOf("Sci-Fi", "Thriller"),
-                    poster_path = "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-                    vote_average = "8.8",
-                    trailer = "https://www.youtube.com/watch?v=YoHD9XEInc0"
-                ),
-                pastWatchedMovies = mutableListOf("The Dark Knight"),
-                chatMessages = mutableListOf()
-            )
-
-        val sampleReview = MovieReview(
-            id = 104,
-            movieTitle = "B99",
-            release_date = "2010-07-16",
-            tagline = "Your mind is the scene of the crime.",
-            overview = "A thief who enters the dreams of others.",
-            genres = listOf("Sci-Fi", "Thriller"),
-            reviewerName = "Alice",
-            reviewText = "Amazing movie!",
-            rating = 5,
-            streamingPlatform = "Netflix"
-        )
-
-        /*
-        // Using the genreViewModel for CRUD
-        genreViewModel.addGenre(sampleGenre)
-        genreViewModel.getGenre(sampleGenre.name)
-        val updates = mapOf("count" to 15)
-        genreViewModel.updateGenre(sampleGenre, updates)
-        genreViewModel.deleteGenre(sampleGenre)
-
-        */
-
-        /*
-        // Using the movieReviewModel for CRUD
-        movieReviewViewModel.addMovieReview(sampleReview)
-        movieReviewViewModel.getMovieReview(sampleReview.id)
-        movieReviewViewModel.deleteMovieReview(sampleReview)
-        val updates = mapOf("overview" to "A detective with a harsh boss", "reviewText" to "Best detective show")
-        movieReviewViewModel.updateMovieReview(sampleReview, updates)
-        */
-
-/*
-        // Using the userProfileModel for CRUD
-        userProfileViewModel.addUserProfile(sampleUser)
-        userProfileViewModel.getUserProfile(sampleUser.id)
-       // userProfileViewModel.deleteUserProfile(sampleUser)
-        val updates = mapOf("email" to "sk@gmail.com", "username" to "SK")
-        userProfileViewModel.updateUserProfile(sampleUser.id, updates)
-*/
-
-        /*
-        // Using the partyGroupModel for CRUD
-        partyGroupViewModel.addPartyGroup(samplePartyGroup)
-        partyGroupViewModel.getPartyGroup(samplePartyGroup)
-        partyGroupViewModel.deletePartyGroup(samplePartyGroup)
-        val updates = mapOf("name" to "CS Post Exam Hangout")
-        partyGroupViewModel.updatePartyGroup(samplePartyGroup, updates)
-        */
-
         setContent {
             FlickPicksTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -350,6 +256,7 @@ fun BottomNavigationBar() {
             composable(Screens.SavedMovies.screen) {
                 SavedMovies(navController = navigationController)
             }
+
         }
     }
 

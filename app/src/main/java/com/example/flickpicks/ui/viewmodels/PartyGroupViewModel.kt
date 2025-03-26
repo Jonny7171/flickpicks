@@ -6,8 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.PartyGroup
+import com.example.flickpicks.data.model.UserProfile
+import com.example.flickpicks.data.repository.MoviesRepository
 import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.PartyGroupRepository
+import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
+import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +23,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PartyGroupViewModel @Inject constructor() : ViewModel() {
+class PartyGroupViewModel @Inject constructor(
+    val userRepository: UserProfileRepository,
+    val moviesRepository: MoviesRepository
+) : ViewModel() {
     val repository = PartyGroupRepository(PartyGroupFirestoreDatabase())
     private val _userPartyGroups = mutableStateListOf<PartyGroup>()
     val userPartyGroups: List<PartyGroup> get() = _userPartyGroups
@@ -247,6 +254,30 @@ class PartyGroupViewModel @Inject constructor() : ViewModel() {
 
 
     }
+
+     fun voteOnMovie(id: Int, userId: String, movieId: String, vote: Boolean) {
+         viewModelScope.launch {
+             repository.voteOnMovie(id, userId, movieId, vote)
+         }
+    }
+    fun startNewGame(groupId: Int, userId: String) {
+        viewModelScope.launch {
+            repository.startNewGame(
+                id = groupId,
+                getUserProfile = { userId -> userRepository.getUserProfile(userId) },
+                fetchMoviesByGenre = { genreList -> moviesRepository.getMoviesByGenres(genreList) }
+            )
+            loadPartyGroup(groupId)
+        }
+    }
+
+    fun resumeExistingGame(groupId: Int, userId: String) {
+        viewModelScope.launch {
+            repository.playExistingGame(groupId, userId)
+            loadPartyGroup(groupId)
+        }
+    }
+
 }
 
 
