@@ -3,37 +3,47 @@ package com.example.flickpicks.ui.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import com.example.flickpicks.R
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+
+private val avatarOptions = listOf("dog", "cat", "glasses", "miami")
+private val avatarMap = mapOf(
+    "dog" to R.drawable.dog,
+    "cat" to R.drawable.cat,
+    "glasses" to R.drawable.glassses,
+    "miami" to R.drawable.miami
+)
 
 @Composable
 fun EditProfile(
     navController: NavController,
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
     if (userId == null) {
@@ -48,15 +58,12 @@ fun EditProfile(
     }
 
     val currentUser = userProfileViewModel.userProfile.value
-
-    // Fetch the user profile
     LaunchedEffect(userId) {
         if (currentUser == null) {
             userProfileViewModel.fetchUserProfile(userId)
         }
     }
 
-    // Local state for form fields
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -66,7 +73,6 @@ fun EditProfile(
     var newPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Error states and messages
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
@@ -74,6 +80,7 @@ fun EditProfile(
     var usernameError by remember { mutableStateOf(false) }
     var currentPasswordError by remember { mutableStateOf(false) }
     var newPasswordError by remember { mutableStateOf(false) }
+
     var firstNameErrorMessage by remember { mutableStateOf("") }
     var lastNameErrorMessage by remember { mutableStateOf("") }
     var emailErrorMessage by remember { mutableStateOf("") }
@@ -82,7 +89,6 @@ fun EditProfile(
     var currentPasswordErrorMessage by remember { mutableStateOf("") }
     var newPasswordErrorMessage by remember { mutableStateOf("") }
 
-    //prepopulate fields
     var hasPopulated by remember { mutableStateOf(false) }
     if (currentUser != null && !hasPopulated) {
         val nameParts = currentUser.name.split(" ")
@@ -93,6 +99,8 @@ fun EditProfile(
         username = currentUser.userName
         hasPopulated = true
     }
+
+    var chosenAvatar by remember { mutableStateOf(currentUser?.profilePicUrl ?: "dog") }
 
     fun validateFields(): Boolean {
         var valid = true
@@ -140,40 +148,33 @@ fun EditProfile(
             usernameErrorMessage = "Username is required."
             valid = false
         }
-
-        // If user is updating password
         if (newPassword.isNotBlank()) {
-            // Current password must not be blank
             if (currentPassword.isBlank()) {
                 currentPasswordError = true
                 currentPasswordErrorMessage = "Enter your current password to update."
                 valid = false
             }
-            // Check new password requirements
             val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#\$%^&+=!]).{12,}\$".toRegex()
             if (!newPassword.matches(passwordRegex)) {
                 newPasswordError = true
-                newPasswordErrorMessage =
-                    "Must be 12+ chars & include uppercase, lowercase, digit, special char."
+                newPasswordErrorMessage = "Must be 12+ chars & include uppercase, lowercase, digit, special char."
                 valid = false
             }
         }
         return valid
     }
-    fun updateProfileFieldsAndGoBack() {
-        // Combine first & last names
-        val updatedName = "$firstName $lastName".trim()
 
+    fun updateProfileFieldsAndGoBack() {
+        val updatedName = "$firstName $lastName".trim()
         val updates = mapOf<String, Any>(
             "name" to updatedName,
             "email" to email,
             "phoneNumber" to phoneNumber,
             "userName" to username,
-            "password" to newPassword
+            "password" to newPassword,
+            "profilePicUrl" to chosenAvatar
         )
-
         userProfileViewModel.updateUserProfile(userId, updates)
-
         navController.navigate(Screens.Profile.screen) {
             popUpTo(Screens.Profile.screen) { inclusive = true }
         }
@@ -181,24 +182,16 @@ fun EditProfile(
 
     fun performEdit() {
         if (!validateFields()) return
-
-        // do password check
-        val user = auth.currentUser ?: return
-
-        // If newPassword is blank, skip password update
+        val userAuth = auth.currentUser ?: return
         if (newPassword.isBlank()) {
-            // Just update Firestore with profile fields
             updateProfileFieldsAndGoBack()
         } else {
-            // Reauth first
-            val credential = EmailAuthProvider.getCredential(user.email!!, currentPassword)
-            user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
+            val credential = EmailAuthProvider.getCredential(userAuth.email!!, currentPassword)
+            userAuth.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                 if (reauthTask.isSuccessful) {
-                    // Reauth success, update password
-                    user.updatePassword(newPassword).addOnCompleteListener { passTask ->
+                    userAuth.updatePassword(newPassword).addOnCompleteListener { passTask ->
                         if (passTask.isSuccessful) {
                             Log.d("EditProfile", "Password updated successfully.")
-                            // Now update Firestore
                             updateProfileFieldsAndGoBack()
                         } else {
                             newPasswordError = true
@@ -216,7 +209,6 @@ fun EditProfile(
     }
 
     val scrollState = rememberScrollState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -228,7 +220,6 @@ fun EditProfile(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Profile Picture
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -236,22 +227,51 @@ fun EditProfile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            val profilePicUrl = currentUser?.profilePicUrl ?: ""
-            Image(
-                painter = if (profilePicUrl.isNotBlank())
-                    rememberAsyncImagePainter(profilePicUrl)
-                else
-                    rememberAsyncImagePainter("https://via.placeholder.com/150"),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray)
-            )
+            if (avatarMap.containsKey(chosenAvatar)) {
+                Image(
+                    painter = painterResource(avatarMap[chosenAvatar] ?: R.drawable.dog),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray)
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.dog),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
-        // First Name
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            avatarOptions.forEach { key ->
+                val resId = avatarMap[key] ?: R.drawable.dog
+                Image(
+                    painter = painterResource(id = resId),
+                    contentDescription = key,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(4.dp)
+                        .clip(CircleShape)
+                        .clickable { chosenAvatar = key }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = firstName,
             onValueChange = {
@@ -263,14 +283,9 @@ fun EditProfile(
             modifier = Modifier.fillMaxWidth()
         )
         if (firstNameError) {
-            Text(
-                text = firstNameErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(firstNameErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        // Last Name
         OutlinedTextField(
             value = lastName,
             onValueChange = {
@@ -282,14 +297,9 @@ fun EditProfile(
             modifier = Modifier.fillMaxWidth()
         )
         if (lastNameError) {
-            Text(
-                text = lastNameErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(lastNameErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        // Email
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -301,14 +311,9 @@ fun EditProfile(
             modifier = Modifier.fillMaxWidth()
         )
         if (emailError) {
-            Text(
-                text = emailErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(emailErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        // Phone Number
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = {
@@ -320,14 +325,9 @@ fun EditProfile(
             modifier = Modifier.fillMaxWidth()
         )
         if (phoneError) {
-            Text(
-                text = phoneErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(phoneErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        // Username
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -339,17 +339,12 @@ fun EditProfile(
             modifier = Modifier.fillMaxWidth()
         )
         if (usernameError) {
-            Text(
-                text = usernameErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(usernameErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Update Password", fontSize = 18.sp)
 
-        // Current Password
         OutlinedTextField(
             value = currentPassword,
             onValueChange = { currentPassword = it },
@@ -359,14 +354,9 @@ fun EditProfile(
             visualTransformation = PasswordVisualTransformation()
         )
         if (currentPasswordError) {
-            Text(
-                text = currentPasswordErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(currentPasswordErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        // New Password
         OutlinedTextField(
             value = newPassword,
             onValueChange = {
@@ -387,11 +377,7 @@ fun EditProfile(
             }
         )
         if (newPasswordError) {
-            Text(
-                text = newPasswordErrorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(newPasswordErrorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

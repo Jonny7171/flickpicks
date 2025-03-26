@@ -168,20 +168,54 @@ fun FriendItem(
     friendName: String,
     onRemove: (String) -> Unit
 ) {
+    val friendProfilePic by produceState(initialValue = "", key1 = friendId) {
+        val repository = com.example.flickpicks.data.repository.UserProfileRepository(
+            com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
+        )
+        val profile = try {
+            repository.getUserProfile(friendId)
+        } catch (e: Exception) {
+            null
+        }
+        value = profile?.profilePicUrl ?: ""
+    }
+    val avatarMap = mapOf(
+        "dog" to com.example.flickpicks.R.drawable.dog,
+        "cat" to com.example.flickpicks.R.drawable.cat,
+        "glasses" to com.example.flickpicks.R.drawable.glassses,
+        "miami" to com.example.flickpicks.R.drawable.miami
+    )
+    val isAvatar = avatarMap.containsKey(friendProfilePic)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = rememberAsyncImagePainter("https://via.placeholder.com/150"),
-            contentDescription = "Friend Profile Picture",
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color.Gray)
-        )
+        if (isAvatar) {
+            Image(
+                painter = androidx.compose.ui.res.painterResource(
+                    avatarMap[friendProfilePic] ?: com.example.flickpicks.R.drawable.dog
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+            )
+        } else {
+            Image(
+                painter = if (friendProfilePic.isNotBlank())
+                    rememberAsyncImagePainter(friendProfilePic)
+                else
+                    rememberAsyncImagePainter("https://via.placeholder.com/150"),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+            )
+        }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = friendName,
@@ -218,7 +252,6 @@ fun RequestsList(
         }
     }
 }
-
 @Composable
 fun FriendRequestItem(
     requestUserId: String,
@@ -226,7 +259,17 @@ fun FriendRequestItem(
     onDecline: (String) -> Unit
 ) {
     var isProcessing by remember { mutableStateOf(false) }
-
+    val friendProfilePic by produceState(initialValue = "", key1 = requestUserId) {
+        val repository = com.example.flickpicks.data.repository.UserProfileRepository(
+            com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
+        )
+        val profile = try {
+            repository.getUserProfile(requestUserId)
+        } catch (e: Exception) {
+            null
+        }
+        value = profile?.profilePicUrl ?: ""
+    }
     val userName by produceState(initialValue = "Loading...", key1 = requestUserId) {
         val repository = com.example.flickpicks.data.repository.UserProfileRepository(
             com.example.flickpicks.data.repository.UserProfileFirestoreDatabase()
@@ -238,9 +281,45 @@ fun FriendRequestItem(
         }
         value = profile?.userName ?: "Unknown"
     }
-
+    val avatarMap = mapOf(
+        "dog" to com.example.flickpicks.R.drawable.dog,
+        "cat" to com.example.flickpicks.R.drawable.cat,
+        "glasses" to com.example.flickpicks.R.drawable.glassses,
+        "miami" to com.example.flickpicks.R.drawable.miami
+    )
+    val isAvatar = avatarMap.containsKey(friendProfilePic)
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = "User: $userName", fontSize = 20.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isAvatar) {
+                Image(
+                    painter = androidx.compose.ui.res.painterResource(
+                        avatarMap[friendProfilePic] ?: com.example.flickpicks.R.drawable.dog
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray)
+                )
+            } else {
+                Image(
+                    painter = if (friendProfilePic.isNotBlank())
+                        rememberAsyncImagePainter(friendProfilePic)
+                    else
+                        rememberAsyncImagePainter("https://via.placeholder.com/150"),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "User: $userName", fontSize = 20.sp)
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
