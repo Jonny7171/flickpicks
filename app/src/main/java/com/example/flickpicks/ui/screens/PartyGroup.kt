@@ -1,5 +1,6 @@
 package com.example.flickpicks.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,12 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun PartyGroup(navController: NavController, groupId: Int, viewModel: PartyGroupViewModel = hiltViewModel()){
     var selectedTab by remember {mutableStateOf(0)}
-    val tabTitles = listOf("Schedule Time", "Movie Recs")
+    val tabTitles = listOf("Schedule Time", "Play","Movie Recs")
 
     val partyGroup by viewModel.partyGroup.collectAsState()
     LaunchedEffect(groupId) {
@@ -49,8 +53,6 @@ fun PartyGroup(navController: NavController, groupId: Int, viewModel: PartyGroup
 
     }
 
-
-    //val partyGroup by viewModel.getPartyGroup(groupId).collectAsState(initial = null)
     Column(modifier = Modifier.fillMaxSize()
         .padding(8.dp)) {
         Row(
@@ -70,8 +72,6 @@ fun PartyGroup(navController: NavController, groupId: Int, viewModel: PartyGroup
             IconButton(onClick = { navController.navigate(Screens.MemberSearch.createRoute(groupId.toString())) }) {
                 Icon(imageVector = Icons.Default.Person, contentDescription = "Show Members")
             }
-
-
         }
 
         Spacer(modifier= Modifier.height(8.dp))
@@ -86,18 +86,14 @@ fun PartyGroup(navController: NavController, groupId: Int, viewModel: PartyGroup
                     text = { Text(title) }
                 )
             }
-
-
-
         }
 
         when (selectedTab) {
-            0 -> ScheduleTimeTab(PartyGroupViewModel(), groupId)
-            1 -> MovieRecsTab()
+            0 -> ScheduleTimeTab(viewModel, groupId)
+            1 -> MovieRecsTab(viewModel, groupId, navController)
+            2 -> RecommendationTab(viewModel, groupId)
         }
-
     }
-
 }
 
 
@@ -175,11 +171,148 @@ fun ScheduleTimeTab(viewModel: PartyGroupViewModel, groupId: Int) {
     }
 }
 
-
 @Composable
-fun MovieRecsTab() {
-    Column (modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Text("Movie Tinder!", style = MaterialTheme.typography.titleMedium)
+fun MovieRecsTab(viewModel: PartyGroupViewModel, groupId: Int, navController: NavController) {
+    val partyGroup by viewModel.partyGroup.collectAsState()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val gameActive = partyGroup?.gameActive == true
+    var showVotingUI by remember { mutableStateOf(false) }
+    var currentIndex by remember { mutableStateOf(0) }
+
+    val suggestions = partyGroup?.genreMovieSuggestions ?: emptyList()
+    val votedMovieIds = partyGroup?.usersVoted?.get(userId).orEmpty().toSet()
+    val remainingMovies = suggestions.filterNot { votedMovieIds.contains(it.id) }
+    val currentMovie = remainingMovies.getOrNull(currentIndex)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            userId?.let {
+                viewModel.startNewGame(groupId, it)
+                showVotingUI = false
+            }
+        }) {
+            Text("Start New Game")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                userId?.let {
+                    viewModel.resumeExistingGame(groupId, it)
+                    showVotingUI = true
+                    currentIndex = 0
+                }
+            },
+            enabled = gameActive
+        ) {
+            Text("Resume Current Game")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            if (gameActive) "A game is in progress. Click above to join!"
+            else "No game is currently active. Start one to play!",
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        if (showVotingUI) {
+            if (remainingMovies.isNotEmpty() && currentMovie != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Text("Vote for a Movie", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Image(
+                            painter = rememberAsyncImagePainter("https://image.tmdb.org/t/p/w500${currentMovie.poster_path}"),
+                            contentDescription = currentMovie.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(currentMovie.title, style = MaterialTheme.typography.titleSmall)
+                        Text(currentMovie.overview, maxLines = 3)
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(onClick = {
+                                userId?.let {
+                                    viewModel.voteOnMovie(groupId, it, currentMovie.id, false)
+                                    currentIndex++
+                                }
+                            }) {
+                                Text("Don't Wanna Watch")
+                            }
+                            Button(onClick = {
+                                userId?.let {
+                                    viewModel.voteOnMovie(groupId, it, currentMovie.id, true)
+                                    currentIndex++
+                                }
+                            }) {
+                                Text("Watch")
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                }
+            } else {
+                Text("You've voted on all movies!", style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+
+
+
+    }
+}
+@Composable
+fun RecommendationTab(viewModel: PartyGroupViewModel, groupId: Int) {
+    val partyGroup by viewModel.partyGroup.collectAsState()
+    val winnerMovie = partyGroup?.winnerMovie
+
+    LaunchedEffect( groupId, winnerMovie?.id ) {
+        viewModel.loadPartyGroup(groupId)
     }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Winner Recommendation", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (winnerMovie?.id?.isNotEmpty() == true) {
+            Image(
+                painter = rememberAsyncImagePainter("https://image.tmdb.org/t/p/w500${winnerMovie.poster_path}"),
+                contentDescription = winnerMovie.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(winnerMovie.title, style = MaterialTheme.typography.titleMedium)
+            Text(winnerMovie.overview, style = MaterialTheme.typography.bodyMedium)
+        } else {
+            Text("Waiting for all members to finish voting...", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
+

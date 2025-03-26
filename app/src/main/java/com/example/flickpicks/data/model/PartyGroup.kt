@@ -17,7 +17,13 @@ data class PartyGroup(
         trailer = null
     ),
     var pastWatchedMovies: MutableList<String> = mutableListOf(),
-    var chatMessages: MutableList<ChatMessage> = mutableListOf()
+    var chatMessages: MutableList<ChatMessage> = mutableListOf(),
+    var genreMovieSuggestions: MutableList<Movie> = mutableListOf(),
+    var movieVotes: MutableMap<String, VoteCounts> = mutableMapOf(),
+    var gameActive: Boolean = false,
+    var usersVoted: MutableMap<String, MutableList<String>> = mutableMapOf(),
+    var votesSoFar: Int = 0
+
 ) {
 
     constructor() : this(0, "", mutableListOf(), mutableMapOf(), Movie(
@@ -30,5 +36,11 @@ data class PartyGroup(
         poster_path = "",
         vote_average = "0.0",
         trailer = null
-    ), mutableListOf(), mutableListOf())
+    ), mutableListOf(), mutableListOf(), mutableListOf())
 }
+
+data class VoteCounts(
+    var yes: Int = 0,
+    var no: Int = 0
+)
+
