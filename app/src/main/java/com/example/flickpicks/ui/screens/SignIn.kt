@@ -8,15 +8,18 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.flickpicks.ui.viewmodels.SignInViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun SignIn(navController: NavController) {
+fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewModel()) {
     // Field values
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -30,6 +33,7 @@ fun SignIn(navController: NavController) {
 
     var auth = FirebaseAuth.getInstance()
     var userDetails by remember { mutableStateOf<String>("") }
+
 
     fun validateEmail(): Boolean {
         if (email.isBlank()) {
@@ -73,6 +77,12 @@ fun SignIn(navController: NavController) {
                     // Sign-in successful
                     Log.d("SignIn", "signInWithEmail:success")
                     val user = auth.currentUser
+
+                    user?.let {
+                        viewModel.saveSession(it.uid, it.email ?: "")
+                        updateUI(it)
+                    }
+
                     navController.navigate(Screens.MyFeed.screen) {
                         popUpTo(Screens.Entry.screen) { inclusive = true }
                     }

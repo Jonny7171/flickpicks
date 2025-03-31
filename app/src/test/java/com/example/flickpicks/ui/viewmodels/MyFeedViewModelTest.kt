@@ -187,10 +187,12 @@ class MyFeedViewModelTest {
         )
 
         val userFriend = Friend(userId, "")
+        @Suppress("UNCHECKED_CAST")
         val friendFriend = Friend(friendId, "")
 
-        val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf(friendFriend))
-        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf(userFriend) )
+
+        val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf())
+        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf())
 
         whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
         whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)

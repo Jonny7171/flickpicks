@@ -11,15 +11,18 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+
+import com.example.flickpicks.ui.viewmodels.SettingsViewModel
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
-import com.google.firebase.Firebase
+
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+
 
 @Composable
 fun Settings
@@ -30,6 +33,7 @@ fun Settings
     var showLogOutDialog by remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     // Fetch user profile when screen is loaded
     LaunchedEffect(userId) {
@@ -92,11 +96,26 @@ fun Settings
             ConfirmationDialog(
                 title = "Log Out",
                 message = "Are you sure you want to log out?",
+
+                /*
                 onConfirm = {
                     Firebase.auth.signOut()
+
                     navController.navigate(Screens.Entry.screen)
                             },
+
+                 */
+                onConfirm = {
+                    settingsViewModel.logout {
+                        navController.navigate(Screens.Entry.screen) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                },
                 onDismiss = { showLogOutDialog = false }
+
+
+
             )
         }
     }
@@ -146,5 +165,6 @@ fun ConfirmationDialog(title: String, message: String, onConfirm: () -> Unit, on
         }
     )
 }
+
 
 
