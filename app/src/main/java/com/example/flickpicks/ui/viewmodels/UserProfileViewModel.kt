@@ -1,7 +1,5 @@
 package com.example.flickpicks.ui.viewmodels
 
-import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,7 +10,6 @@ import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
