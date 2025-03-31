@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -31,7 +33,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.flickpicks.ui.screens.BlockedUsers
 import com.example.flickpicks.ui.screens.ChatScreen
 import com.example.flickpicks.ui.screens.EditProfile
 import com.example.flickpicks.ui.screens.UserSearchScreen
@@ -43,7 +44,6 @@ import com.example.flickpicks.ui.screens.MyFeed
 import com.example.flickpicks.ui.screens.Party
 import com.example.flickpicks.ui.screens.PartyGroup
 import com.example.flickpicks.ui.screens.Profile
-import com.example.flickpicks.ui.screens.SavedMovies
 import com.example.flickpicks.ui.screens.Screens
 import com.example.flickpicks.ui.screens.Search
 import com.example.flickpicks.ui.screens.Settings
@@ -90,8 +90,8 @@ fun BottomNavigationBar() {
         Screens.Search.screen -> selected.value = Icons.Default.Search
         Screens.Friends.screen -> selected.value = Icons.Default.Face
         Screens.MyFeed.screen -> selected.value = Icons.Default.Menu
-        Screens.Party.screen -> selected.value = Icons.Default.Person
-        Screens.Profile.screen -> selected.value = Icons.Default.AccountBox
+        Screens.Party.screen -> selected.value = Icons.Default.MailOutline
+        Screens.Profile.screen -> selected.value = Icons.Default.AccountCircle
     }
 
     Scaffold (
@@ -111,7 +111,8 @@ fun BottomNavigationBar() {
                             Icons.Default.Search,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Search) GreenJC else Color.LightGray
+                            tint = if (selected.value == Icons.Default.Search) Color.hsl(
+                                133F, 1F, 0.38F) else Color.White
                         )
                     }
                     IconButton(
@@ -127,7 +128,8 @@ fun BottomNavigationBar() {
                             Icons.Default.Face,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Face) GreenJC else Color.LightGray
+                            tint = if (selected.value == Icons.Default.Face)  Color.hsl(
+                                133F, 1F, 0.38F) else Color.White
                         )
                     }
                     IconButton(
@@ -143,13 +145,14 @@ fun BottomNavigationBar() {
                             Icons.Default.Menu,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Menu) GreenJC else Color.LightGray
+                            tint = if (selected.value == Icons.Default.Menu)  Color.hsl(
+                                133F, 1F, 0.38F) else Color.White
                         )
                     }
 
                     IconButton(
                         onClick = {
-                            selected.value = Icons.Default.Person
+                            selected.value = Icons.Default.MailOutline
                             navigationController.navigate(Screens.Party.screen) {
                                 popUpTo(0)
                             }
@@ -157,16 +160,17 @@ fun BottomNavigationBar() {
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(
-                            Icons.Default.Person,
+                            Icons.Default.MailOutline,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Person) GreenJC else Color.LightGray
+                            tint = if (selected.value == Icons.Default.MailOutline)  Color.hsl(
+                                133F, 1F, 0.38F) else Color.White
                         )
                     }
 
                     IconButton(
                         onClick = {
-                            selected.value = Icons.Default.AccountBox
+                            selected.value = Icons.Default.AccountCircle
                             navigationController.navigate(Screens.Profile.screen) {
                                 popUpTo(0)
                             }
@@ -174,10 +178,11 @@ fun BottomNavigationBar() {
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(
-                            Icons.Default.AccountBox,
+                            Icons.Default.AccountCircle,
                             contentDescription = null,
                             modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.AccountBox) GreenJC else Color.LightGray
+                            tint = if (selected.value == Icons.Default.AccountCircle)  Color.hsl(
+                                133F, 1F, 0.38F) else Color.White
                         )
                     }
                 }
@@ -250,13 +255,6 @@ fun BottomNavigationBar() {
                     MovieDetailScreen(movieId, navigationController)
                 }
             }
-            composable(Screens.BlockedUsers.screen) {
-                BlockedUsers(navController = navigationController)
-            }
-            composable(Screens.SavedMovies.screen) {
-                SavedMovies(navController = navigationController)
-            }
-
         }
     }
 
