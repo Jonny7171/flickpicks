@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -122,24 +123,23 @@ fun SignUp(
         return true
     }
 
-    fun validateUsername(): Boolean {
-        if (username.isBlank()) {
-            usernameError = true
-            usernameErrorMessage = "Username is required."
-            return false
-        }
-
-        userProfileViewModel.viewModelScope.launch {
-            val usernameExists = userProfileViewModel.isUsernameTaken(username)
-
-            if (usernameExists) {
-                usernameError = true
-                usernameErrorMessage = "Username already taken. Please choose another."
-                return@launch
-            }
-        }
-        return true
+suspend fun validateUsername(): Boolean {
+    if (username.isBlank()) {
+        usernameError = true
+        usernameErrorMessage = "Username is required."
+        return false
     }
+
+    val usernameExists = userProfileViewModel.isUsernameTaken(username)
+    return if (usernameExists) {
+        usernameError = true
+        usernameErrorMessage = "Username already taken. Please choose another."
+        false
+    } else {
+        true
+    }
+}
+
     fun validatePassword(): Boolean {
         if (password.isBlank()) {
             passwordError = true
@@ -149,20 +149,17 @@ fun SignUp(
         return true
     }
 
-    fun performSignUp() {
-        // Validate all fields
-        validateUsername()
-        validateEmail()
-        validatePhoneNumber()
-        validateFirstName()
-        validateLastName()
-        validatePassword()
+    suspend fun performSignUp() {
 
-        if (
-            firstNameError || lastNameError ||
-            emailError || phoneError ||
-            usernameError || passwordError
-        ) {
+        val usernameValid = validateUsername()
+        val emailValid = validateEmail()
+        val phoneNumberValid = validatePhoneNumber()
+        val firstNameValid = validateFirstName()
+        val lastNameValid = validateLastName()
+        val passwordValid = validatePassword()
+
+        val allValid = usernameValid && emailValid && phoneNumberValid && firstNameValid && lastNameValid && passwordValid
+        if (!allValid) {
             return
         }
 
@@ -358,8 +355,15 @@ fun SignUp(
         }
 
         // Complete Sign Up Button
+        val scope = rememberCoroutineScope()
         Button(
-            onClick = { performSignUp() },
+            onClick = {
+                scope.launch {
+                    userProfileViewModel.viewModelScope.launch {
+                        performSignUp()
+                    }
+                }
+                      },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Complete Sign Up")
