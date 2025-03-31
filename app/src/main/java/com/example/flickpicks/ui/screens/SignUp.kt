@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -31,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.flickpicks.data.model.UserProfile
-import com.example.flickpicks.data.repository.UserSessionRepository
 import com.example.flickpicks.ui.viewmodels.SignUpViewModel
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth

@@ -186,12 +186,10 @@ class MyFeedViewModelTest {
             streamingPlatform = "Netflix"
         )
 
-        val userFriend = Friend(userId, "")
         @Suppress("UNCHECKED_CAST")
-        val friendFriend = Friend(friendId, "")
 
 
-        val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf())
+        val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf(friendId))
         val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf())
 
         whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)

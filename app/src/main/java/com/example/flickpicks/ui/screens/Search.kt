@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -46,8 +47,9 @@ import androidx.navigation.NavController
 import com.example.flickpicks.R
 import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.ui.theme.BlueNew
-import com.example.flickpicks.ui.viewmodels.MyFeedViewModel
 import com.example.flickpicks.ui.viewmodels.SearchViewModel
+import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,7 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun Search(
     navController: NavController,
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
 ) {
     var searchText by remember { mutableStateOf("") }
     val movieResults by viewModel.searchResults
@@ -130,14 +132,29 @@ fun SearchResultsScreen(navController: NavController, movies: List<Movie>) {
 @Composable
 fun SearchMovieItem(
     movie: Movie, onClick: () -> Unit,
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    userProfileViewModel: UserProfileViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    var trailer: String? = null
+    var trailer by remember { mutableStateOf<String?>(null) }
+
+    val likedMovies = viewModel.likedMovies.value
+    val dislikedMovies = viewModel.dislikedMovies.value
+    val savedMovies = viewModel.savedMovies.value
+
+    val isLiked = likedMovies[movie.title] ?: false
+    val isDisliked = dislikedMovies[movie.title] ?: false
+    val isSaved = savedMovies[movie.title] ?: false
+
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
 
     LaunchedEffect(Unit) {
         trailer = viewModel.getTrailer(movie.id)
+        userId?.let { userProfileViewModel.fetchUserProfile(it) }
+
     }
+    val currentUser by userProfileViewModel.userProfile
 
     Card(
         modifier = Modifier
@@ -173,16 +190,46 @@ fun SearchMovieItem(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                if (isLiked) {
+                    // Remove from liked
+                    viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = true)
+                } else {
+                    // Add to liked
+                    viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = false)
+
+                    // If it was disliked, remove from disliked list
+                    if (isDisliked) {
+                        viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = true)
+                    }
+                }
+            }) {
                 Icon(
                     Icons.Default.ThumbUp,
-                    contentDescription = "Like"
+                    contentDescription = "Like",
+                    tint = if (isLiked) Color.Blue else Color.Black
+
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                if (isDisliked) {
+                    // Remove from disliked
+                    viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = true)
+                } else {
+                    // Add to disliked
+                    viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = false)
+
+                    // If it was liked, remove from liked list
+                    if (isLiked) {
+                        viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = true)
+                    }
+                }
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_thumbs_down),
-                    contentDescription = "Dislike"
+                    contentDescription = "Dislike",
+                    tint = if (isDisliked) Color.Blue else Color.Black
+
                 )
             }
             Row(
@@ -190,7 +237,10 @@ fun SearchMovieItem(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                TextButton(onClick = { }) { Text("Save") }
+                TextButton(onClick = {
+                    viewModel.saveMovie(currentUser?.id ?: "", movie.title)
+
+                }) { Text(if (isSaved) "Saved" else "Save") }
                 TextButton(
                     onClick = {
                         trailer?.let {

@@ -6,19 +6,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.UserProfile
-import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
-class UserProfileViewModel @Inject constructor() : ViewModel() {
-    val repository = UserProfileRepository(UserProfileFirestoreDatabase())
-    private val db = Firebase.firestore
+class UserProfileViewModel @Inject constructor(
+    private val repository: UserProfileRepository,
+    private val db: FirebaseFirestore
+) : ViewModel() {
 
     private val _userProfile = mutableStateOf<UserProfile?>(null)
     val userProfile: State<UserProfile?> = _userProfile
@@ -26,18 +25,6 @@ class UserProfileViewModel @Inject constructor() : ViewModel() {
     fun addUserProfile(profile: UserProfile) {
         viewModelScope.launch {
             repository.addUserProfile(profile)
-        }
-    }
-
-    fun getUserProfile(profileId: String) {
-        viewModelScope.launch {
-            repository.getUserProfile(profileId)
-        }
-    }
-
-    fun deleteUserProfile(profileId: String) {
-        viewModelScope.launch {
-            repository.deleteUserProfile(profileId)
         }
     }
 
@@ -141,11 +128,6 @@ class UserProfileViewModel @Inject constructor() : ViewModel() {
             )
         }
     }
-
-    fun setPreviewProfile(profile: UserProfile) {
-        _userProfile.value = profile
-    }
-
 
     fun removeSavedMovie(movie: String) {
         viewModelScope.launch {

@@ -6,11 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.PartyGroup
-import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.repository.MoviesRepository
 import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.PartyGroupRepository
-import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -139,10 +137,6 @@ class PartyGroupViewModel @Inject constructor(
 
     }
 
-
-    //fun sendMessage(message: ChatMessage) {
-    //    messages.add(message)
-    // }
     fun addPartyGroup(group: PartyGroup, userId: String) {
         viewModelScope.launch {
             val totalGroups = repository.getTotalPartyGroupsCount()
@@ -160,15 +154,6 @@ class PartyGroupViewModel @Inject constructor(
         }
     }
 
-    /*
-    fun getPartyGroup(groupId: Int) {
-        viewModelScope.launch {
-            repository.getPartyGroup(groupId)
-        }
-    }
-
-     */
-
     fun deletePartyGroup(group: PartyGroup) {
 
         viewModelScope.launch {
@@ -177,14 +162,6 @@ class PartyGroupViewModel @Inject constructor(
         }
     }
 
-    /*
-    fun updatePartyGroup(group: PartyGroup, updates: Map<String, Any>) {
-        viewModelScope.launch {
-            repository.updatePartyGroup(group, updates)
-        }
-    }
-
-     */
 
     fun sendMessage(groupId: Int, message: ChatMessage) {
         viewModelScope.launch {
@@ -193,15 +170,6 @@ class PartyGroupViewModel @Inject constructor(
     }
 
 
-    /*
-    fun getMessages(groupId: Int) {
-        viewModelScope.launch {
-            val newMessages = repository.getChatMessages(groupId)
-            _messages.value = newMessages.sortedBy { it.timestamp } // Ensures messages are sorted
-        }
-    }
-
-     */
 
     fun loadUserPartyGroups(userId: String) {
 
@@ -211,14 +179,6 @@ class PartyGroupViewModel @Inject constructor(
         }
     }
 
-    /*
-    fun getTotalPartyCount() {
-        viewModelScope.launch {
-            repository.getTotalPartyGroupsCount()
-        }
-    }
-
-     */
 
     fun findBestTime(groupId: Int, onResult: (String) -> Unit) {
         firestore.collection("party_groups")

@@ -8,7 +8,6 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -180,6 +179,7 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
 
 
         // Display user details after successful sign-in
+        /*
         if (userDetails.isNotEmpty()) {
             Text(
                 text = userDetails,
@@ -188,5 +188,7 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
+
+         */
     }
 }
