@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -58,205 +59,249 @@ import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import com.example.flickpicks.data.repository.UserSessionRepository
+import com.example.flickpicks.data.database.Session
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var sessionRepository: UserSessionRepository
+
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         FirebaseApp.initializeApp(this)
         auth = FirebaseAuth.getInstance()
+
+        //val session = sessionRepository.getSession()
         setContent {
             FlickPicksTheme {
+                /*
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    BottomNavigationBar()
+                    BottomNavigationBar(startDestination = if (session != null) Screens.MyFeed.screen else Screens.Entry.screen)
                 }
-            }
-        }
-    }
-}
 
-@Composable
-fun BottomNavigationBar() {
-    val navigationController = rememberNavController()
-    val context = LocalContext.current.applicationContext
-    val selected = remember{ mutableStateOf(Icons.Default.Menu) }
-    val currentBackStackEntry = navigationController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry.value?.destination?.route
-    val shouldShowBottomBar = currentRoute != Screens.Entry.screen && currentRoute != Screens.SignUp.screen && currentRoute != Screens.SignIn.screen
+                 */
+                val sessionState = remember { mutableStateOf<Session?>(null) }
 
-    when (currentRoute) {
-        Screens.Search.screen -> selected.value = Icons.Default.Search
-        Screens.Friends.screen -> selected.value = Icons.Default.Face
-        Screens.MyFeed.screen -> selected.value = Icons.Default.Menu
-        Screens.Party.screen -> selected.value = Icons.Default.MailOutline
-        Screens.Profile.screen -> selected.value = Icons.Default.AccountCircle
-    }
+                LaunchedEffect(Unit) {
+                    sessionState.value = sessionRepository.getSession()
+                }
 
-    Scaffold (
-        bottomBar = {
-            if (shouldShowBottomBar) {
-                BottomAppBar(containerColor = BlueNew) {
-                    IconButton(
-                        onClick = {
-                            selected.value = Icons.Default.Search
-                            navigationController.navigate(Screens.Search.screen) {
-                                popUpTo(0)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
+                // Optional: show loading until session loads
+                if (sessionState.value != null || sessionState.value == null) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Search) Color.hsl(
-                                133F, 1F, 0.38F) else Color.White
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            selected.value = Icons.Default.Face
-                            navigationController.navigate(Screens.Friends.screen) {
-                                popUpTo(0)
+                        BottomNavigationBar(
+                            startDestination = if (sessionState.value != null) {
+                                Screens.MyFeed.screen
+                            } else {
+                                Screens.Entry.screen
                             }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            Icons.Default.Face,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Face)  Color.hsl(
-                                133F, 1F, 0.38F) else Color.White
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            selected.value = Icons.Default.Menu
-                            navigationController.navigate(Screens.MyFeed.screen) {
-                                popUpTo(0)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            Icons.Default.Menu,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.Menu)  Color.hsl(
-                                133F, 1F, 0.38F) else Color.White
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            selected.value = Icons.Default.MailOutline
-                            navigationController.navigate(Screens.Party.screen) {
-                                popUpTo(0)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            Icons.Default.MailOutline,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.MailOutline)  Color.hsl(
-                                133F, 1F, 0.38F) else Color.White
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            selected.value = Icons.Default.AccountCircle
-                            navigationController.navigate(Screens.Profile.screen) {
-                                popUpTo(0)
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected.value == Icons.Default.AccountCircle)  Color.hsl(
-                                133F, 1F, 0.38F) else Color.White
                         )
                     }
                 }
             }
         }
-    ) { paddingValues ->
-        NavHost(
-            navController = navigationController,
-            startDestination = Screens.Entry.screen,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(Screens.Entry.screen) {
-                Entry(navController = navigationController)
-            }
-            composable(Screens.SignUp.screen) {
-                SignUp(navController = navigationController)
-            }
-            composable(Screens.UserSearch.screen) {
-                UserSearchScreen(navController = navigationController)
-            }
+    }
 
-            composable(Screens.SignIn.screen) {
-                SignIn(navController = navigationController)
-            }
-            composable(Screens.MyFeed.screen)  {
-                MyFeed(navController = navigationController)
-            }
-            composable(Screens.UserPreferences.screen)  {
-                UserPreferences(navController = navigationController)
-            }
-            composable(Screens.Search.screen)  { Search(navController = navigationController) }
-            composable(Screens.Friends.screen) {
-                Friends(navController = navigationController)
-            }
-            composable(Screens.Party.screen)   {
-                Party(navController = navigationController)
-            }
-            composable(Screens.Profile.screen) {
-                Profile(navController = navigationController)
-            }
-            composable(Screens.EditProfile.screen) {
-                EditProfile(navController = navigationController)
-            }
-            composable(Screens.Settings.screen) {
-                Settings(navController = navigationController)
-            }
-            composable(Screens.PartyGroup.screen + "/{groupId}") { backStackEntry ->
-                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull() ?: 0
-                PartyGroup(navController = navigationController, groupId)
-            }
+    @Composable
+    fun BottomNavigationBar(startDestination: String) {
+        val navigationController = rememberNavController()
+        val selected = remember { mutableStateOf(Icons.Default.Menu) }
+        val currentBackStackEntry = navigationController.currentBackStackEntryAsState()
+        val currentRoute = currentBackStackEntry.value?.destination?.route
+        val shouldShowBottomBar =
+            currentRoute != Screens.Entry.screen && currentRoute != Screens.SignUp.screen && currentRoute != Screens.SignIn.screen
 
-            composable(Screens.PartyGroupChat.screen + "/{groupId}") { backStackEntry ->
-                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
-                if (groupId != null) {
-                    val partyGroupViewModel: PartyGroupViewModel = hiltViewModel()
-                    ChatScreen(navController = navigationController, viewModel = partyGroupViewModel, groupId = groupId)
+        when (currentRoute) {
+            Screens.Search.screen -> selected.value = Icons.Default.Search
+            Screens.Friends.screen -> selected.value = Icons.Default.Face
+            Screens.MyFeed.screen -> selected.value = Icons.Default.Menu
+            Screens.Party.screen -> selected.value = Icons.Default.MailOutline
+            Screens.Profile.screen -> selected.value = Icons.Default.AccountCircle
+        }
+
+        Scaffold(
+            bottomBar = {
+                if (shouldShowBottomBar) {
+                    BottomAppBar(containerColor = BlueNew) {
+                        IconButton(
+                            onClick = {
+                                selected.value = Icons.Default.Search
+                                navigationController.navigate(Screens.Search.screen) {
+                                    popUpTo(0)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = if (selected.value == Icons.Default.Search) Color.hsl(
+                                    133F, 1F, 0.38F
+                                ) else Color.White
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                selected.value = Icons.Default.Face
+                                navigationController.navigate(Screens.Friends.screen) {
+                                    popUpTo(0)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Default.Face,
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = if (selected.value == Icons.Default.Face) Color.hsl(
+                                    133F, 1F, 0.38F
+                                ) else Color.White
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                selected.value = Icons.Default.Menu
+                                navigationController.navigate(Screens.MyFeed.screen) {
+                                    popUpTo(0)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = if (selected.value == Icons.Default.Menu) Color.hsl(
+                                    133F, 1F, 0.38F
+                                ) else Color.White
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                selected.value = Icons.Default.MailOutline
+                                navigationController.navigate(Screens.Party.screen) {
+                                    popUpTo(0)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Default.MailOutline,
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = if (selected.value == Icons.Default.MailOutline) Color.hsl(
+                                    133F, 1F, 0.38F
+                                ) else Color.White
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                selected.value = Icons.Default.AccountCircle
+                                navigationController.navigate(Screens.Profile.screen) {
+                                    popUpTo(0)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = if (selected.value == Icons.Default.AccountCircle) Color.hsl(
+                                    133F, 1F, 0.38F
+                                ) else Color.White
+                            )
+                        }
+                    }
                 }
             }
-            composable(Screens.MemberSearch.screen) { backStackEntry ->
-                val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
-                if (groupId != null) {
-                    val addMemberViewModel: AddMemberViewModel = hiltViewModel()
-                    MemberSearchScreen(navController = navigationController, groupId = groupId, addMemberViewModel)
+        ) { paddingValues ->
+            NavHost(
+                navController = navigationController,
+                startDestination = startDestination,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                composable(Screens.Entry.screen) {
+                    Entry(navController = navigationController)
                 }
-            }
+                composable(Screens.SignUp.screen) {
+                    SignUp(navController = navigationController)
+                }
+                composable(Screens.UserSearch.screen) {
+                    UserSearchScreen(navController = navigationController)
+                }
+                composable(Screens.SignIn.screen) {
+                    SignIn(navController = navigationController)
+                }
+                composable(Screens.MyFeed.screen) {
+                    MyFeed(navController = navigationController)
+                }
+                composable(Screens.UserPreferences.screen) {
+                    UserPreferences(navController = navigationController)
+                }
+                composable(Screens.Search.screen) { Search(navController = navigationController) }
+                composable(Screens.Friends.screen) {
+                    Friends(navController = navigationController)
+                }
+                composable(Screens.Party.screen) {
+                    Party(navController = navigationController)
+                }
+                composable(Screens.Profile.screen) {
+                    Profile(navController = navigationController)
+                }
+                composable(Screens.EditProfile.screen) {
+                    EditProfile(navController = navigationController)
+                }
+                composable(Screens.Settings.screen) {
+                    Settings(navController = navigationController)
+                }
+                composable(Screens.PartyGroup.screen + "/{groupId}") { backStackEntry ->
+                    val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull() ?: 0
+                    PartyGroup(navController = navigationController, groupId)
+                }
 
-            composable(Screens.MovieDetail.screen) { backStackEntry ->
-                val movieId = backStackEntry.arguments?.getString("movieId")
-                if (movieId != null) {
-                    MovieDetailScreen(movieId, navigationController)
+                composable(Screens.PartyGroupChat.screen + "/{groupId}") { backStackEntry ->
+                    val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
+                    if (groupId != null) {
+                        val partyGroupViewModel: PartyGroupViewModel = hiltViewModel()
+                        ChatScreen(
+                            navController = navigationController,
+                            viewModel = partyGroupViewModel,
+                            groupId = groupId
+                        )
+                    }
+                }
+                composable(Screens.MemberSearch.screen) { backStackEntry ->
+                    val groupId = backStackEntry.arguments?.getString("groupId")?.toIntOrNull()
+                    if (groupId != null) {
+                        val addMemberViewModel: AddMemberViewModel = hiltViewModel()
+                        MemberSearchScreen(
+                            navController = navigationController,
+                            groupId = groupId,
+                            addMemberViewModel
+                        )
+                    }
+                }
+
+                composable(Screens.MovieDetail.screen) { backStackEntry ->
+                    val movieId = backStackEntry.arguments?.getString("movieId")
+                    if (movieId != null) {
+                        MovieDetailScreen(movieId, navigationController)
+                    }
                 }
             }
         }
+
+
     }
-
-
 }
