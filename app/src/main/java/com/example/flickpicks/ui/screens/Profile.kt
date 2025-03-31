@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.flickpicks.R
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel

@@ -34,7 +34,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.flickpicks.data.model.Movie
-import com.example.flickpicks.ui.viewmodels.MyFeedViewModel
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 import com.google.firebase.auth.FirebaseAuth
 

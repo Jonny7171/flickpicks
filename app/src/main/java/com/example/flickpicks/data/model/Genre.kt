@@ -1,7 +1,5 @@
 package com.example.flickpicks.data.model
 
-import kotlinx.serialization.Serializable
-
 val GENRE_MAP = mapOf(
     "action" to "28",
     "adventure" to "12",
@@ -24,9 +22,4 @@ val GENRE_MAP = mapOf(
     "western" to "37"
 )
 
-@Serializable
-data class Genre (
-    var name: String = "",
-    var count: Int = 0
-)
 

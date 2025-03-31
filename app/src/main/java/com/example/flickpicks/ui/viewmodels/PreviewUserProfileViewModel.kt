@@ -3,7 +3,6 @@ package com.example.flickpicks.ui.viewmodels
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

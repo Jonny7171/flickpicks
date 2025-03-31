@@ -3,14 +3,11 @@ package com.example.flickpicks.data.repository
 import android.util.Log
 import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.GENRE_MAP
-import com.example.flickpicks.data.model.Genre
 import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.model.UserProfile
 import com.example.flickpicks.data.model.VoteCounts
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -47,7 +44,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         // Store in memory
         groups[newGroup.id.toString()] = newGroup
 
-        Log.d("InMemoryDB", "Added new group with ID: ${newGroup.id}")
+        //Log.d("InMemoryDB", "Added new group with ID: ${newGroup.id}")
         return true
     }
 
@@ -130,7 +127,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         val group = get(id) ?: return false
 
         if (!group.gameActive) {
-            Log.w("Vote", "Game is not active for group $id")
+            //Log.w("Vote", "Game is not active for group $id")
             return false
         }
 
@@ -138,7 +135,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         val userVotedMovies = group.usersVoted.getOrPut(userId) { mutableListOf() }
 
         if (userVotedMovies.contains(movieId)) {
-            Log.d("Vote", "User $userId already voted for movie $movieId")
+            //Log.d("Vote", "User $userId already voted for movie $movieId")
             return false
         }
 
@@ -161,9 +158,9 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             val winner = group.genreMovieSuggestions.find { it.id == topMovieId }
             if (winner != null) {
                 group.winnerMovie = winner
-                Log.d("Vote", "Voting complete — Winner is ${winner.title}")
+                //Log.d("Vote", "Voting complete — Winner is ${winner.title}")
             } else {
-                Log.d("Vote", "Voting complete — but no winner found")
+                //Log.d("Vote", "Voting complete — but no winner found")
             }
         }
 

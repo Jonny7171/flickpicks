@@ -1,7 +1,6 @@
 package com.example.flickpicks.data.repository
 
 import android.util.Log
-import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.model.UserProfile

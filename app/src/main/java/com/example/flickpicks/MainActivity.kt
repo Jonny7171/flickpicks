@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -27,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -53,7 +50,6 @@ import com.example.flickpicks.ui.screens.SignUp
 import com.example.flickpicks.ui.screens.UserPreferences
 import com.example.flickpicks.ui.theme.BlueNew
 import com.example.flickpicks.ui.theme.FlickPicksTheme
-import com.example.flickpicks.ui.theme.GreenJC
 import com.example.flickpicks.ui.viewmodels.AddMemberViewModel
 import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 import com.google.firebase.FirebaseApp
@@ -75,15 +71,9 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this)
         auth = FirebaseAuth.getInstance()
 
-        //val session = sessionRepository.getSession()
         setContent {
             FlickPicksTheme {
-                /*
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    BottomNavigationBar(startDestination = if (session != null) Screens.MyFeed.screen else Screens.Entry.screen)
-                }
 
-                 */
                 val sessionState = remember { mutableStateOf<Session?>(null) }
 
                 LaunchedEffect(Unit) {
