@@ -32,7 +32,7 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MockitoExtension::class)
-class MyFeedViewModelTest {
+class aMyFeedViewModelTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
