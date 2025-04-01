@@ -1,4 +1,3 @@
-
 package com.example.flickpicks.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
@@ -15,9 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddMemberViewModel @Inject constructor(
-
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
 
     // Party group state
     private val _partyGroup = MutableStateFlow<PartyGroup?>(null)
@@ -55,11 +53,15 @@ class AddMemberViewModel @Inject constructor(
     fun fetchMemberNames(memberIds: List<String>) {
         viewModelScope.launch {
             val userMap = mutableMapOf<String, String>()
-            firestore.collection("users").whereIn("id", memberIds).get()
+            firestore.collection("users")
+                .whereIn("id", memberIds)
+                .get()
                 .addOnSuccessListener { documents ->
                     for (doc in documents) {
                         val user = doc.toObject(UserProfile::class.java)
-                        userMap[user.id] = user.userName  // Store user name instead of ID
+                        if (user != null) {
+                            userMap[user.id] = user.userName
+                        }
                     }
                     _memberNames.value = userMap
                 }
@@ -100,26 +102,23 @@ class AddMemberViewModel @Inject constructor(
                     return@addOnSuccessListener
                 }
 
-
                 partyGroup.members.add(userId)
-
 
                 groupRef.set(partyGroup)
                     .addOnSuccessListener {
                         userRef.get().addOnSuccessListener { userDoc ->
                             val userProfile = userDoc.toObject(UserProfile::class.java)
-
                             if (userProfile != null) {
                                 val updatedGroups = userProfile.partyGroups.toMutableList()
-
-
                                 if (!updatedGroups.any { it.id == partyGroup.id }) {
                                     updatedGroups.add(partyGroup)
                                 }
 
                                 userRef.update("partyGroups", updatedGroups)
                                     .addOnSuccessListener {
-                                        _partyGroup.value = partyGroup.copy(members = partyGroup.members.toMutableList())
+                                        _partyGroup.value = partyGroup.copy(
+                                            members = partyGroup.members.toMutableList()
+                                        )
                                         val updatedMemberNames = _memberNames.value.toMutableMap()
                                         updatedMemberNames[userId] = userProfile.userName
                                         _memberNames.value = updatedMemberNames
@@ -140,9 +139,3 @@ class AddMemberViewModel @Inject constructor(
         }
     }
 }
-
-
-
-
-
-
