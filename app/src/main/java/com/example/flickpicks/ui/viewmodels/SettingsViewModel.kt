@@ -12,15 +12,28 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val sessionRepository: UserSessionRepository
+    private val sessionRepository: UserSessionRepository,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             sessionRepository.clearSession()
-            //FirebaseAuth.getInstance().signOut()
-            Firebase.auth.signOut()
+            //Firebase.auth.signOut()
+            authManager.signOut()
             onComplete()
         }
     }
 }
+
+interface AuthManager {
+    fun signOut()
+}
+
+class FirebaseAuthManager @Inject constructor() : AuthManager {
+    override fun signOut() {
+        Firebase.auth.signOut()
+    }
+}
+
+

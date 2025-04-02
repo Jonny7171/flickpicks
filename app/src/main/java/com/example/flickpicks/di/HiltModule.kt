@@ -9,6 +9,8 @@ import com.example.flickpicks.data.repository.UserProfileDatabase
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserSessionRepository
 import com.example.flickpicks.data.source.MoviesSource
+import com.example.flickpicks.ui.viewmodels.AuthManager
+import com.example.flickpicks.ui.viewmodels.FirebaseAuthManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,4 +58,7 @@ object HiltModule {
     fun provideSessionRepository(dao: SessionDao): UserSessionRepository {
         return UserSessionRepository(dao)
     }
+
+    @Provides
+    fun provideAuthManager(): AuthManager = FirebaseAuthManager()
 }
