@@ -1,7 +1,6 @@
 package com.example.flickpicks.ui.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.flickpicks.data.model.Friend
 import com.example.flickpicks.data.model.GENRE_MAP
 import com.example.flickpicks.data.model.Movie
 import com.example.flickpicks.data.model.MovieReview
@@ -32,7 +31,7 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MockitoExtension::class)
-class aMyFeedViewModelTest {
+class MyFeedViewModelTest {
 
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
@@ -186,11 +185,8 @@ class aMyFeedViewModelTest {
             streamingPlatform = "Netflix"
         )
 
-        @Suppress("UNCHECKED_CAST")
-
-
         val userProfile = UserProfile(userId, "User", "", "", "", "", followers = mutableListOf(friendId))
-        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf())
+        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", moviesReviewed = mutableListOf(review), followers = mutableListOf(userId) )
 
         whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
         whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)

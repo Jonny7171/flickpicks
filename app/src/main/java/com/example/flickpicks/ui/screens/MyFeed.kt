@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,75 +52,6 @@ import com.example.flickpicks.ui.viewmodels.MyFeedViewModel
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-// Mock MovieReview Data
-val mockReviews = listOf(
-    MovieReview(
-        id = 1,
-        movieId = "27205", // TMDB ID for Inception
-        movieTitle = "Inception",
-        release_date = "2010-07-16",
-        tagline = "Your mind is the scene of the crime.",
-        overview = "A mind-bending thriller.",
-        genres = listOf("Sci-Fi", "Thriller"),
-        reviewerName = "Alice",
-        reviewText = "Amazing visuals and storytelling!",
-        rating = 5,
-        streamingPlatform = "Netflix"
-    ),
-    MovieReview(
-        id = 2,
-        movieId = "157336", // TMDB ID for Interstellar
-        movieTitle = "Interstellar",
-        release_date = "2014-11-07",
-        tagline = "Mankind was born on Earth. It was never meant to die here.",
-        overview = "Exploring space and time.",
-        genres = listOf("Sci-Fi", "Adventure"),
-        reviewerName = "Bob",
-        reviewText = "Mind-blowing space exploration!",
-        rating = 5,
-        streamingPlatform = "Amazon Prime"
-    ),
-    MovieReview(
-        id = 3,
-        movieId = "496243", // TMDB ID for Parasite
-        movieTitle = "Parasite",
-        release_date = "2019-05-30",
-        tagline = "Act like you own the place.",
-        overview = "A sharp social thriller.",
-        genres = listOf("Drama", "Thriller"),
-        reviewerName = "Charlie",
-        reviewText = "Brilliant social commentary!",
-        rating = 5,
-        streamingPlatform = "Hulu"
-    ),
-    MovieReview(
-        id = 4,
-        movieId = "155", // TMDB ID for The Dark Knight
-        movieTitle = "The Dark Knight",
-        release_date = "2008-07-18",
-        tagline = "Why so serious?",
-        overview = "The greatest superhero film.",
-        genres = listOf("Action", "Crime"),
-        reviewerName = "David",
-        reviewText = "Best Batman movie ever!",
-        rating = 5,
-        streamingPlatform = "HBO Max"
-    ),
-    MovieReview(
-        id = 5,
-        movieId = "438631", // TMDB ID for Dune (2021)
-        movieTitle = "Dune",
-        release_date = "2021-10-22",
-        tagline = "Beyond fear, destiny awaits.",
-        overview = "A futuristic sci-fi epic.",
-        genres = listOf("Sci-Fi", "Adventure"),
-        reviewerName = "Eve",
-        reviewText = "Stunning cinematography!",
-        rating = 4,
-        streamingPlatform = "Disney+"
-    )
-)
-
 @SuppressLint("ContextCastToActivity")
 @Composable
 fun MyFeed(
@@ -125,7 +60,9 @@ fun MyFeed(
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
     var selectedFilter by remember { mutableStateOf("Trending") }
-    val filters = listOf("Trending", "Reviewed By Friends", "Recommendations")
+    val filters = listOf("Trending", "Recommendations")
+    val reviewedFilter = listOf("Reviewed By Friends")
+    var selectedMode by remember { mutableStateOf("Movies") }
     val trendingMovies by viewModel.trendingMovies
     val reviewedByFriends by viewModel.moviesReviewedByFriends
     val recommendations by viewModel.recommendedMovies
@@ -153,46 +90,88 @@ fun MyFeed(
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "My Feed",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(8.dp)
-        )
-
-        // Top Navigation Bar
-        LazyRow(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(2.dp),
-            horizontalArrangement = Arrangement.Start
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            items(filters) { filter ->
-                Button(
-                    onClick = { selectedFilter = filter },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedFilter == filter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-                    ),
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                ) {
-                    Text(
-                        text = filter,
-                        color = if (selectedFilter == filter) Color.White else Color.Black
-                    )
-                }
+            Text(
+                text = if (selectedMode == "Movies") "Movies" else "Reviews",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.weight(1f)
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Show Reviews")
+                Switch(
+                    checked = selectedMode == "Reviews",
+                    onCheckedChange = { isChecked ->
+                        selectedMode = if (isChecked) "Reviews" else "Movies"
+                        selectedFilter = if (isChecked) "Reviewed By Friends" else "Trending"
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        if (selectedMode == "Movies") {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                items(filters) { filter ->
+                    Button(
+                        onClick = { selectedFilter = filter },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedFilter == filter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier.padding(horizontal = 2.dp)
+                    ) {
+                        Text(
+                            text = filter,
+                            color = if (selectedFilter == filter) Color.White else Color.Black
+                        )
+                    }
+                }
+            }
 
-        when (selectedFilter) {
-            "Trending" -> {
-                MoviesFeedScreen(navController, trendingMovies)
+            Spacer(modifier = Modifier.height(4.dp))
+
+            when (selectedFilter) {
+                "Trending" -> MoviesFeedScreen(navController, trendingMovies)
+                else -> MoviesFeedScreen(navController, recommendations)
             }
-            "Reviewed By Friends" -> {
-                ReviewsFeedScreen(navController, reviewedByFriends)
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                items(reviewedFilter) { filter ->
+                    Button(
+                        onClick = { selectedFilter = filter },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedFilter == filter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier.padding(horizontal = 2.dp)
+                    ) {
+                        Text(
+                            text = filter,
+                            color = if (selectedFilter == filter) Color.White else Color.Black
+                        )
+                    }
+                }
             }
-            else -> {
-                MoviesFeedScreen(navController, recommendations)
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            when (selectedFilter) {
+                "Reviewed By Friends" -> ReviewsFeedScreen(navController, reviewedByFriends)
             }
         }
     }
@@ -287,10 +266,39 @@ fun MovieItem(
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Rating: ⭐ ${"%.1f".format((movie.vote_average.toFloat() / 2))} / 5",
-                style = MaterialTheme.typography.labelMedium
-            )
+
+            // Convert rating to stars (scale 10-point rating to 5-star system)
+            val ratingOutOfFive = (movie.vote_average.toFloat() / 2).toInt().coerceIn(0, 5)
+            val emptyStars = 5 - ratingOutOfFive
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Rating: ", style = MaterialTheme.typography.labelLarge)
+                repeat(ratingOutOfFive) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = "Star Outline",
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Filled Star",
+                            tint = Color.Yellow,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                repeat(emptyStars) {
+                    Icon(
+                        imageVector = Icons.Outlined.Star,
+                        contentDescription = "Empty Star",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -368,12 +376,7 @@ fun ReviewItem(
     val context = LocalContext.current
     var trailer by remember { mutableStateOf<String?>(null) }
 
-    val likedMovies = viewModel.likedMovies.value
-    val dislikedMovies = viewModel.dislikedMovies.value
     val savedMovies = viewModel.savedMovies.value
-
-    val isLiked = likedMovies[review.movieTitle] ?: false
-    val isDisliked = dislikedMovies[review.movieTitle] ?: false
     val isSaved = savedMovies[review.movieTitle] ?: false
 
     val auth = FirebaseAuth.getInstance()
@@ -409,7 +412,38 @@ fun ReviewItem(
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Review: ${review.reviewText}", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Rating: ⭐ ${review.rating}/5", style = MaterialTheme.typography.labelMedium)
+
+            val ratingOutOfFive = review.rating.coerceIn(0, 5)
+            val emptyStars = 5 - ratingOutOfFive
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Rating: ", style = MaterialTheme.typography.labelLarge)
+                repeat(ratingOutOfFive) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = "Star Outline",
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Filled Star",
+                            tint = Color.Yellow,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                repeat(emptyStars) {
+                    Icon(
+                        imageVector = Icons.Outlined.Star,
+                        contentDescription = "Empty Star",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -420,53 +454,11 @@ fun ReviewItem(
             .padding(top = 8.dp),
         horizontalArrangement = Arrangement.Start
     ) {
-        IconButton(onClick = {
-            if (isLiked) {
-                // Remove from liked
-                viewModel.saveLikedMovie(currentUser?.id ?: "", review.movieTitle, remove = true)
-            } else {
-                // Add to liked
-                viewModel.saveLikedMovie(currentUser?.id ?: "", review.movieTitle, remove = false)
-
-                // If it was disliked, remove from disliked list
-                if (isDisliked) {
-                    viewModel.saveDislikedMovie(currentUser?.id ?: "", review.movieTitle, remove = true)
-                }
-            }
-        }) {
-            Icon(
-                Icons.Default.ThumbUp,
-                contentDescription = "Like",
-                tint = if (isLiked) Color.Blue else Color.Black
-            )
-        }
-
-        IconButton(onClick = {
-            if (isDisliked) {
-                // Remove from disliked
-                viewModel.saveDislikedMovie(currentUser?.id ?: "", review.movieTitle, remove = true)
-            } else {
-                // Add to disliked
-                viewModel.saveDislikedMovie(currentUser?.id ?: "", review.movieTitle, remove = false)
-
-                // If it was liked, remove from liked list
-                if (isLiked) {
-                    viewModel.saveLikedMovie(currentUser?.id ?: "", review.movieTitle, remove = true)
-                }
-            }
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_thumbs_down),
-                contentDescription = "Dislike",
-                tint = if (isDisliked) Color.Blue else Color.Black
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
         TextButton(onClick = {
             viewModel.saveMovie(currentUser?.id ?: "", review.movieTitle)
-        }) { Text(if (isSaved) "Saved" else "Save") }
+        }) { Text(if (isSaved) "Saved Movie" else "Save Movie") }
+
+        Spacer(modifier = Modifier.weight(1f))
 
         TextButton(
             onClick = {
