@@ -17,10 +17,8 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 # Table of Contents 
 
 ## Documentation
-* [Project Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/FlickPicks-Project-Proposal) 
-This should be your original project proposal. Add a section at the end titled “Revisions” and describe any deviations you made from your original proposal, to what you delivered. If there are no deviations at all, then indicate that in this section.
-* [Design Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Design-Proposal) 
-This should be your original design proposal. Add a section at the end titled “Revisions” and describe any deviations you made from your original proposal, to what you delivered. If there are no deviations at all, then indicate that in this section.
+* [Project Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/FlickPicks-Project-Proposal) (unchanged from initial release)
+* [Design Proposal](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Design-Proposal) (changed from initial release)
 * [User documentation](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/User-Documentation)
 * [Design diagrams](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Design-Diagrams) 
 
