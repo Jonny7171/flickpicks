@@ -182,6 +182,8 @@ fun MovieRecsTab(viewModel: PartyGroupViewModel, groupId: Int, navController: Na
     val votedMovieIds = partyGroup?.usersVoted?.get(userId).orEmpty().toSet()
     val remainingMovies = suggestions.filterNot { votedMovieIds.contains(it.id) }
     val currentMovie = remainingMovies.getOrNull(currentIndex)
+    val canResumeGame = gameActive && remainingMovies.isNotEmpty()
+
 
     Column(
         modifier = Modifier
@@ -208,18 +210,19 @@ fun MovieRecsTab(viewModel: PartyGroupViewModel, groupId: Int, navController: Na
                     currentIndex = 0
                 }
             },
-            enabled = gameActive
+            enabled = canResumeGame
         ) {
             Text("Resume Current Game")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+        if (!canResumeGame) {
+            Text("No game is currently active. Start one to play", style = MaterialTheme.typography.bodyMedium)
+        }
+            else if (remainingMovies.isNotEmpty() && currentMovie != null) {
+            Text("A game is in progress. Click Resume to join", style = MaterialTheme.typography.bodyMedium)
 
-        Text(
-            if (gameActive) "A game is in progress. Click above to join!"
-            else "No game is currently active. Start one to play!",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
         if (showVotingUI) {
@@ -242,7 +245,7 @@ fun MovieRecsTab(viewModel: PartyGroupViewModel, groupId: Int, navController: Na
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(currentMovie.title, style = MaterialTheme.typography.titleSmall)
-                        Text(currentMovie.overview, maxLines = 3)
+                        Text(currentMovie.overview)
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
