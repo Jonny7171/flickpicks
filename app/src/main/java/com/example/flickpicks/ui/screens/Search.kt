@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -170,12 +175,44 @@ fun SearchMovieItem(
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "Release Date: ${movie.release_date}", style = MaterialTheme.typography.labelLarge)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Overview: ${movie.overview}", style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Rating: ⭐ ${"%.1f".format((movie.vote_average.toFloat() / 2))} / 5",
-                style = MaterialTheme.typography.labelMedium
+                text = "Overview: ${if (movie.overview != "") movie.overview else "No Overview Available"}",
+                style = MaterialTheme.typography.bodySmall
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Convert rating to stars (scale 10-point rating to 5-star system)
+            val ratingOutOfFive = (movie.vote_average.toFloat() / 2).toInt().coerceIn(0, 5)
+            val emptyStars = 5 - ratingOutOfFive
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Rating: ", style = MaterialTheme.typography.labelLarge)
+                repeat(ratingOutOfFive) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = "Star Outline",
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Filled Star",
+                            tint = Color.Yellow,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                repeat(emptyStars) {
+                    Icon(
+                        imageVector = Icons.Outlined.Star,
+                        contentDescription = "Empty Star",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
         }
     }

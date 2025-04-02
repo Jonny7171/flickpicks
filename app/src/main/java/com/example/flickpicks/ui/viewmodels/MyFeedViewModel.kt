@@ -11,8 +11,10 @@ import com.example.flickpicks.data.repository.MovieReviewRepository
 import com.example.flickpicks.data.repository.MoviesRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlin.collections.Map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 var reviewIdsMap = mutableMapOf<Int, Boolean>()
@@ -193,6 +195,29 @@ class MyFeedViewModel @Inject constructor(
                 userRepository.updateUserProfile(it.id, mapOf("moviesReviewed" to updatedReviews))
             }
         }
+    }
+
+    suspend fun getCurrUserMovieReview(userId: String, movieId: String): MovieReview? {
+        return withContext(Dispatchers.IO) {
+            val userProfile = userRepository.getUserProfile(userId)
+            val userReviews = userProfile?.moviesReviewed
+            userReviews?.find { it.movieId == movieId }
+        }
+    }
+
+    suspend fun getFriendsMovieReviews(userId: String, movieId: String): MutableList<MovieReview> {
+        val userProfile = userRepository.getUserProfile(userId)
+        val friendsIds = userProfile?.followers ?: emptyList()
+        val reviews = mutableListOf<MovieReview>()
+
+        for (friendId in friendsIds) {
+            val friendProfile = userRepository.getUserProfile(friendId)
+            val friendReviews = friendProfile?.moviesReviewed ?: emptyList()
+            val movieReview = friendReviews.find { it.movieId == movieId }
+            movieReview?.let { reviews.add(it) }
+        }
+
+        return reviews
     }
 
     suspend fun getMovieDetails(movieId: String) {
