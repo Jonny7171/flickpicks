@@ -40,7 +40,7 @@ class MoviesSource {
                     release_date = obj["release_date"]?.jsonPrimitive?.content ?: "",
                     overview = obj["overview"]?.jsonPrimitive?.content ?: "",
                     tagline = "", // TMDB doesn't provide tagline in trending API
-                    genres = emptyList(), // Fetch genre separately if needed
+                    genres = emptyList(),
                     poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                     vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
                     trailer = null
@@ -84,7 +84,6 @@ class MoviesSource {
             val response: JsonObject = client.get(url).body()
             val results = response["results"]?.jsonObject
 
-            // (change "US" to Canada)
             val usProviders = results?.get("US")?.jsonObject?.get("flatrate")?.jsonArray
 
             usProviders?.map { provider ->
@@ -99,7 +98,7 @@ class MoviesSource {
 
     suspend fun getMoviesByGenres(genreIds: List<String>): List<Movie> {
         return try {
-            val genreQuery = genreIds.joinToString("|") // Format as "28|12|16" for API
+            val genreQuery = genreIds.joinToString("|") // Format is "28|12|16" for API
             val fullUrl = "$TMDB_BASE_URL/discover/movie?api_key=$TMDB_API_KEY&with_genres=$genreQuery"
 
             val response: JsonObject = client.get(fullUrl).body()
@@ -114,7 +113,7 @@ class MoviesSource {
                     release_date = obj["release_date"]?.jsonPrimitive?.content ?: "",
                     overview = obj["overview"]?.jsonPrimitive?.content ?: "",
                     tagline = "", // TMDB doesn't provide tagline in discover API
-                    genres = emptyList(), // Fetch genre separately if needed
+                    genres = emptyList(),
                     poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                     vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
                     trailer = null
@@ -127,30 +126,6 @@ class MoviesSource {
     }
 
     suspend fun getMovieTrailer(movieId: String): String? {
-        val url = "$TMDB_BASE_URL/movie/$movieId/videos?api_key=$TMDB_API_KEY"
-
-        return try {
-            val response: JsonObject = client.get(url).body()
-            val results = response["results"]?.jsonArray ?: return null
-
-            // Filter for the official trailer on YouTube
-            val trailer = results.firstOrNull { video ->
-                val obj = video.jsonObject
-                obj["site"]?.jsonPrimitive?.content == "YouTube" &&
-                        obj["type"]?.jsonPrimitive?.content == "Trailer"
-            }
-
-            // Return the YouTube key if a trailer is found
-            trailer?.jsonObject?.get("key")?.jsonPrimitive?.content?.let { key ->
-                "https://www.youtube.com/watch?v=$key"
-            }
-        } catch (e: Exception) {
-            println("Error fetching movie trailer: ${e.localizedMessage}")
-            null
-        }
-    }
-
-    suspend fun getListofGenres(movieId: String): String? {
         val url = "$TMDB_BASE_URL/movie/$movieId/videos?api_key=$TMDB_API_KEY"
 
         return try {
@@ -211,7 +186,7 @@ class MoviesSource {
                     release_date = obj["release_date"]?.jsonPrimitive?.content ?: "",
                     overview = obj["overview"]?.jsonPrimitive?.content ?: "",
                     tagline = "", // TMDB doesn't provide tagline in search API
-                    genres = emptyList(), // Fetch genre separately if needed
+                    genres = emptyList(),
                     poster_path = "https://image.tmdb.org/t/p/w500${obj["poster_path"]?.jsonPrimitive?.content}",
                     vote_average = obj["vote_average"]?.jsonPrimitive?.content ?: "",
                     trailer = null

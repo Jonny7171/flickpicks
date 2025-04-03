@@ -19,6 +19,7 @@ import org.junit.Rule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -91,8 +92,6 @@ class MyFeedViewModelTest {
 
         viewModel.fetchRecommendedMovies(userId)
         testDispatcher.scheduler.advanceUntilIdle()
-
-        println("Recommended Movies: ${viewModel.recommendedMovies.value}")
 
         assertEquals(1, viewModel.recommendedMovies.value.size)
         assertEquals("Movie A", viewModel.recommendedMovies.value[0].title)
@@ -192,7 +191,7 @@ class MyFeedViewModelTest {
         whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)
 
         viewModel.fetchReviewedByFriends(userId)
-        advanceUntilIdle() // Ensures coroutine execution
+        advanceUntilIdle()
 
         assertEquals(1, viewModel.moviesReviewedByFriends.value.size)
         assertEquals("Movie A", viewModel.moviesReviewedByFriends.value[0].movieTitle)
@@ -262,5 +261,141 @@ class MyFeedViewModelTest {
             assertEquals(5, review.rating)
             true
         })
+    }
+
+    @Test
+    fun `getCurrUserMovieReview should return review if user has reviewed movie`() = runTest {
+        val userId = "user1"
+        val movieId = "movie123"
+
+        val review = MovieReview(
+            id = 1,
+            movieId = movieId,
+            movieTitle = "Movie A",
+            release_date = "2024-01-01",
+            tagline = "",
+            overview = "Great movie",
+            genres = listOf("Action"),
+            reviewerName = "User",
+            reviewText = "Loved it!",
+            rating = 5,
+            streamingPlatform = "Netflix"
+        )
+
+        val userProfile = UserProfile(userId, "User", "", "", "", "", "", moviesReviewed = mutableListOf(review))
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+
+        val result = viewModel.getCurrUserMovieReview(userId, movieId)
+
+        assertEquals(review, result)
+    }
+
+    @Test
+    fun `getCurrUserMovieReview should return null if user has not reviewed movie`() = runTest {
+        val userId = "user1"
+        val movieId = "movie123"
+
+        val userProfile = UserProfile(userId, "User", "", "", "", "", "", moviesReviewed = mutableListOf())
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+
+        val result = viewModel.getCurrUserMovieReview(userId, movieId)
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getFriendsMovieReviews should return reviews from friends who reviewed the movie`() = runTest {
+        val userId = "user1"
+        val friendId = "friend1"
+        val movieId = "movie123"
+
+        val review = MovieReview(
+            id = 1,
+            movieId = movieId,
+            movieTitle = "Movie A",
+            release_date = "2024-01-01",
+            tagline = "",
+            overview = "Awesome movie",
+            genres = listOf("Action"),
+            reviewerName = "Friend",
+            reviewText = "Really enjoyed it!",
+            rating = 4,
+            streamingPlatform = "Prime Video"
+        )
+
+        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", "", moviesReviewed = mutableListOf(review))
+        val userProfile = UserProfile(userId, "User", "", "", "", "", "", followers = mutableListOf(friendId))
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+        whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)
+
+        val result = viewModel.getFriendsMovieReviews(userId, movieId)
+
+        assertEquals(listOf(review), result)
+    }
+
+    @Test
+    fun `getFriendsMovieReviews should return empty list if no friends reviewed the movie`() = runTest {
+        val userId = "user1"
+        val friendId = "friend1"
+        val movieId = "movie123"
+
+        val friendProfile = UserProfile(friendId, "Friend", "", "", "", "", "", moviesReviewed = mutableListOf())
+        val userProfile = UserProfile(userId, "User", "", "", "", "", "", followers = mutableListOf(friendId))
+
+        whenever(userProfileRepository.getUserProfile(userId)).thenReturn(userProfile)
+        whenever(userProfileRepository.getUserProfile(friendId)).thenReturn(friendProfile)
+
+        val result = viewModel.getFriendsMovieReviews(userId, movieId)
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `getTrailer should return trailer URL if available`() = runTest {
+        val movieId = "1"
+        val trailerUrl = "https://youtube.com/watch?v=123"
+
+        whenever(moviesRepository.getMovieTrailer(movieId)).thenReturn(trailerUrl)
+
+        val result = viewModel.getTrailer(movieId)
+
+        assertEquals(trailerUrl, result)
+    }
+
+    @Test
+    fun `getTrailer should return null if no trailer is available`() = runTest {
+        val movieId = "1"
+
+        whenever(moviesRepository.getMovieTrailer(movieId)).thenReturn(null)
+
+        val result = viewModel.getTrailer(movieId)
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getMovieReviews should return list of reviews if available`() = runTest {
+        val movieId = "1"
+        val reviews = listOf("User A" to "Great!", "User B" to "Amazing!")
+
+        whenever(moviesRepository.getMovieReviews(movieId)).thenReturn(reviews)
+
+        val result = viewModel.getMovieReviews(movieId)
+
+        assertEquals(reviews, result)
+    }
+
+    @Test
+    fun `getMovieReviews should return null if no reviews are available`() = runTest {
+        val movieId = "1"
+
+        whenever(moviesRepository.getMovieReviews(movieId)).thenReturn(null)
+
+        val result = viewModel.getMovieReviews(movieId)
+
+        assertEquals(null, result)
     }
 }

@@ -1,4 +1,5 @@
 package com.example.flickpicks.data.repository
+
 import com.example.flickpicks.data.database.Session
 import com.example.flickpicks.data.database.SessionDao
 
