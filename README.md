@@ -30,6 +30,7 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 - [Version 0.1.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.1.0-Release)
 - [Version 0.2.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.2.0-Release)
 - [Version 0.3.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.3.0-Release)
+- [Version 1.0.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-1.0.0-Release)
 
 
 
