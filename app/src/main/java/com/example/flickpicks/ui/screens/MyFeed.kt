@@ -267,7 +267,6 @@ fun MovieItem(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Convert rating to stars (scale 10-point rating to 5-star system)
             val ratingOutOfFive = (movie.vote_average.toFloat() / 2).toInt().coerceIn(0, 5)
             val emptyStars = 5 - ratingOutOfFive
 
@@ -310,13 +309,10 @@ fun MovieItem(
     ) {
         IconButton(onClick = {
             if (isLiked) {
-                // Remove from liked
                 viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = true)
             } else {
-                // Add to liked
                 viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = false)
 
-                // If it was disliked, remove from disliked list
                 if (isDisliked) {
                     viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = true)
                 }
@@ -331,13 +327,10 @@ fun MovieItem(
 
         IconButton(onClick = {
             if (isDisliked) {
-                // Remove from disliked
                 viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = true)
             } else {
-                // Add to disliked
                 viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = false)
 
-                // If it was liked, remove from liked list
                 if (isLiked) {
                     viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = true)
                 }
@@ -376,7 +369,7 @@ fun ReviewItem(
     val context = LocalContext.current
     var trailer by remember { mutableStateOf<String?>(null) }
 
-    val savedMovies = viewModel.savedMovies.value
+    val savedMovies by viewModel.savedMovies
     val isSaved = savedMovies[review.movieTitle] ?: false
 
     val auth = FirebaseAuth.getInstance()

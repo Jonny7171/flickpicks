@@ -148,8 +148,8 @@ class MyFeedViewModel @Inject constructor(
                 }
                 userRepository.updateUserProfile(it.id, mapOf("moviesSaved" to updatedMoviesSaved))
                 _savedMovies.value = _savedMovies.value.toMutableMap().apply {
-                    this[movieName] = !contains(movieName)
-                }
+                    this[movieName] = !this.getOrDefault(movieName, false)
+                }.toMap()
             }
         }
     }

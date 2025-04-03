@@ -21,7 +21,4 @@ sealed class Screens (val screen: String){
     data object MovieDetail : Screens(screen = "movieDetail/{movieId}") {
         fun createRoute(movieId: String) = "movieDetail/$movieId"
     }
-    data object MovieSwipeScreen : Screens("movieSwipe/{groupId}") {
-        fun createRoute(groupId: Int) = "movieSwipe/$groupId"
-    }
 }
