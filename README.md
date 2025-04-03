@@ -5,6 +5,8 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 ## Video/Screenshots 
 
 ## Getting Started
+Instructions on how to install and launch your project. If you have any additional instructions that the TA needs, please put them here 
+(e.g., how to launch from a Docker container; how to install keys so that they can connect to your database and so on).
 
 ## Team Details
 * Team number: LAB101-6
