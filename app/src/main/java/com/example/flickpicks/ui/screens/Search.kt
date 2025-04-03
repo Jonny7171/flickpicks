@@ -73,9 +73,9 @@ fun Search(
     var searchJob by remember { mutableStateOf<Job?>(null) }
 
     LaunchedEffect(searchText) {
-        searchJob?.cancel() // Cancel previous job if exists
+        searchJob?.cancel()
         searchJob = coroutineScope.launch {
-            delay(300) // Debounce: Wait 300ms before making API call
+            delay(300)
             if (searchText.isNotEmpty()) {
                 viewModel.searchMovies(searchText)
             }
@@ -181,7 +181,6 @@ fun SearchMovieItem(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Convert rating to stars (scale 10-point rating to 5-star system)
             val ratingOutOfFive = (movie.vote_average.toFloat() / 2).toInt().coerceIn(0, 5)
             val emptyStars = 5 - ratingOutOfFive
 
@@ -256,7 +255,7 @@ fun SearchMovieItem(
                     // Add to disliked
                     viewModel.saveDislikedMovie(currentUser?.id ?: "", movie.title, remove = false)
 
-                    // If it was liked, remove from liked list
+                    // If liked, remove from liked list
                     if (isLiked) {
                         viewModel.saveLikedMovie(currentUser?.id ?: "", movie.title, remove = true)
                     }

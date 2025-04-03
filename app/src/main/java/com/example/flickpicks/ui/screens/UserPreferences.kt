@@ -84,8 +84,6 @@ fun UserPreferences(
                 style = MaterialTheme.typography.headlineLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Chunk the genres list into rows of 2 items
             val chunkedGenres = commonGenres.chunked(2)
             LazyColumn {
                 items(chunkedGenres) { genreRow ->
@@ -122,8 +120,6 @@ fun UserPreferences(
                 }
             }
         }
-
-        // Error & "Complete" button
         Column {
             if (errorMessage.isNotEmpty()) {
                 Text(

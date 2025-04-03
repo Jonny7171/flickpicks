@@ -74,7 +74,6 @@ fun Settings(
                 message = "Are you sure you want to log out?",
                 onConfirm = {
                     settingsViewModel.logout {
-                        // Once logout is successful, navigate to your entry screen
                         navController.navigate(Screens.Entry.screen) {
                             popUpTo(0) { inclusive = true }
                         }

@@ -79,8 +79,6 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     sessionState.value = sessionRepository.getSession()
                 }
-
-                // Optional: show loading until session loads
                 if (sessionState.value != null || sessionState.value == null) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
