@@ -44,6 +44,7 @@ fun UserSearchScreen(navController: NavController) {
     val context = LocalContext.current
     val userSearchViewModel: UserSearchViewModel = viewModel()
     var requestStatus by remember { mutableStateOf("") }
+    var sentRequests by remember { mutableStateOf(setOf<String>()) }
 
     fun performSearch() {
         keyboardController?.hide()
@@ -84,7 +85,6 @@ fun UserSearchScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display "User not found" if no results
             if (hasSearched && userSearchViewModel.userList.value.isEmpty() && searchText.isNotBlank()) {
                 Text(text = "User not found", fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -95,15 +95,24 @@ fun UserSearchScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Display users
             LazyColumn {
                 items(userSearchViewModel.userList.value) { user ->
-                    SearchUserItem(user = user, onSendRequest = { targetUser ->
-                        userSearchViewModel.sendFriendRequest(targetUser) { success, message ->
-                            requestStatus = message
-                            Toast.makeText(context, requestStatus, Toast.LENGTH_SHORT).show()
-                        }
-                    })
+                    SearchUserItem(
+                        user = user,
+                        onSendRequest = { targetUser ->
+                            if (targetUser.id !in sentRequests) {
+                                sentRequests = sentRequests + targetUser.id
+                                userSearchViewModel.sendFriendRequest(targetUser) { success, message ->
+                                    requestStatus = message
+                                    Toast.makeText(context, requestStatus, Toast.LENGTH_SHORT).show()
+                                    if (!success) {
+                                        sentRequests = sentRequests - targetUser.id
+                                    }
+                                }
+                            }
+                        },
+                        isRequestSent = user.id in sentRequests
+                    )
                 }
             }
         }
@@ -113,16 +122,17 @@ fun UserSearchScreen(navController: NavController) {
 @Composable
 fun SearchUserItem(
     user: com.example.flickpicks.data.model.UserProfile,
-    onSendRequest: (com.example.flickpicks.data.model.UserProfile) -> Unit
+    onSendRequest: (com.example.flickpicks.data.model.UserProfile) -> Unit,
+    isRequestSent: Boolean
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        // Display usernames
         Text(text = user.userName, fontSize = 24.sp)
         Button(
             onClick = { onSendRequest(user) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isRequestSent
         ) {
-            Text("Send Friend Request")
+            Text(if (isRequestSent) "Request Sent" else "Send Friend Request")
         }
     }
 }
