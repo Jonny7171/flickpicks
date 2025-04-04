@@ -27,7 +27,6 @@ fun Settings(
     val userId = auth.currentUser?.uid
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
-    // Fetch user profile when screen is loaded
     LaunchedEffect(userId) {
         userId?.let { userProfileViewModel.fetchUserProfile(it) }
     }
@@ -44,13 +43,11 @@ fun Settings(
         return
     }
 
-    // Main column layout
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header text
         Text(
             text = "Settings",
             fontSize = 22.sp,
@@ -58,7 +55,6 @@ fun Settings(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Log Out item
         SettingsItem(
             icon = Icons.Filled.ExitToApp,
             title = "Log Out",
@@ -67,7 +63,6 @@ fun Settings(
             showLogOutDialog = true
         }
 
-        // Log Out confirmation dialog
         if (showLogOutDialog) {
             ConfirmationDialog(
                 title = "Log Out",

@@ -58,12 +58,11 @@ fun MemberSearchScreen(navController: NavController, groupId: Int, viewModel: Ad
     val requestStatus by remember { mutableStateOf("") }
 
 
-    val partyGroup by viewModel.partyGroup.collectAsState() // Get party group detail
-    //val userList by viewModel.userList.collectAsState()
+    val partyGroup by viewModel.partyGroup.collectAsState()
     val memberNames by viewModel.memberNames.collectAsState()
 
     LaunchedEffect(groupId) {
-        viewModel.loadPartyGroup(groupId) // Load existing members
+        viewModel.loadPartyGroup(groupId)
 
     }
 
@@ -71,7 +70,7 @@ fun MemberSearchScreen(navController: NavController, groupId: Int, viewModel: Ad
         keyboardController?.hide()
         focusManager.clearFocus()
         hasSearched = true
-        userSearchViewModel.searchUsers(searchText) // Fetch users from Firestore
+        userSearchViewModel.searchUsers(searchText)
     }
 
     Scaffold(
@@ -98,7 +97,6 @@ fun MemberSearchScreen(navController: NavController, groupId: Int, viewModel: Ad
                 items(partyGroup?.members ?: emptyList()) { memberId ->
                     val memberName = memberNames[memberId] ?: "Loading..."
                     Text(text = memberName, fontSize = 18.sp, modifier = Modifier.padding(8.dp))
-                    //Text(text = memberId, fontSize = 18.sp, modifier = Modifier.padding(8.dp))
                 }
             }
 
@@ -110,7 +108,6 @@ fun MemberSearchScreen(navController: NavController, groupId: Int, viewModel: Ad
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
 
             OutlinedTextField(
                 value = searchText,
@@ -156,8 +153,6 @@ fun MemberSearchScreen(navController: NavController, groupId: Int, viewModel: Ad
                     })
                 }
             }
-
-
         }
     }
 }
@@ -170,7 +165,6 @@ fun SearchMemberItem(
     onSendRequest: (com.example.flickpicks.data.model.UserProfile) -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        // Display usernames
         Text(text = user.userName, fontSize = 24.sp)
         Button(
             onClick = { onSendRequest(user) },

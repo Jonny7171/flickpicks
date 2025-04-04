@@ -30,7 +30,7 @@ class PartyGroupViewModel @Inject constructor(
     val userPartyGroups: List<PartyGroup> get() = _userPartyGroups
 
     private val _messages =
-        MutableStateFlow<List<ChatMessage>>(emptyList()) // Mutable Flow for Live Updates
+        MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -192,7 +192,6 @@ class PartyGroupViewModel @Inject constructor(
                 val dayFrequency = mutableMapOf<String, Int>()
                 val timeFrequency = mutableMapOf<String, Int>()
 
-                // Count votes for each day & time
                 for (userAvailability in timesAvailable.values) {
                     userAvailability["days"]?.forEach { day ->
                         dayFrequency[day] = dayFrequency.getOrDefault(day, 0) + 1
@@ -202,7 +201,6 @@ class PartyGroupViewModel @Inject constructor(
                     }
                 }
 
-                // Find most common day & time
                 val bestDay = dayFrequency.maxByOrNull { it.value }?.key ?: "No best day"
                 val bestTime = timeFrequency.maxByOrNull { it.value }?.key ?: "No best time"
 

@@ -37,9 +37,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
 
     override suspend fun add(group: PartyGroup, userId: String): Boolean {
         val maxId = groups.keys.mapNotNull { it.toIntOrNull() }.maxOrNull() ?: 0
-
         val newGroup = group.copy(id = maxId + 1)
-
         groups[newGroup.id.toString()] = newGroup
 
         return true
@@ -120,9 +118,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         vote: Boolean
     ): Boolean {
         val group = get(id) ?: return false
-
         if (!group.gameActive) {
-            //Log.w("Vote", "Game is not active for group $id")
             return false
         }
 
@@ -130,7 +126,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         val userVotedMovies = group.usersVoted.getOrPut(userId) { mutableListOf() }
 
         if (userVotedMovies.contains(movieId)) {
-            //Log.d("Vote", "User $userId already voted for movie $movieId")
             return false
         }
 
@@ -153,9 +148,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             val winner = group.genreMovieSuggestions.find { it.id == topMovieId }
             if (winner != null) {
                 group.winnerMovie = winner
-                //Log.d("Vote", "Voting complete — Winner is ${winner.title}")
-            } else {
-                //Log.d("Vote", "Voting complete — but no winner found")
             }
         }
 
@@ -176,7 +168,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
 
         private val db = Firebase.firestore
 
-        // Add a PartyGroup
         override suspend fun add(group: PartyGroup, userId: String): Boolean {
             return try {
                 val groupsSnapshot = db.collection("party_groups").get().await()
@@ -185,13 +176,9 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
                     .maxOrNull() ?: 0
 
                 val newGroup = group.copy(id = maxId + 1)
-                // add group to firestore
                 db.collection("party_groups").document(newGroup.id.toString()).set(newGroup).await()
-
-                // update's user profile to include group
                 val currUser = db.collection("users").document(userId)
                 currUser.update("partyGroups", FieldValue.arrayUnion(newGroup)).await()
-
                 Log.d("Firestore", "Party group added for: ${newGroup.groupName}")
                 true
             } catch (e: Exception) {
@@ -230,7 +217,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         override suspend fun delete(groupId: Int): Boolean {
             return try {
                 val batch = db.batch()
-
                 val usersSnapshot = db.collection("users").get().await()
                 for (userDoc in usersSnapshot.documents) {
                     val userRef = userDoc.reference
@@ -260,7 +246,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             db.collection("party_groups")
                 .document(groupId.toString())
                 .collection("messages")
-                .orderBy("timestamp") // Ensure messages are sorted chronologically
+                .orderBy("timestamp")
                 .addSnapshotListener { snapshot, e ->
                     if (e != null) {
                         Log.e("Firestore", "Error listening for chat messages", e)
@@ -344,7 +330,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             val userVotedMovies = group.usersVoted.getOrPut(userId) { mutableListOf() }
             if (userVotedMovies.contains(movieId)) return false // Prevent double voting
 
-            // Update vote counts
             val currentVoteCount = group.movieVotes.getOrDefault(movieId, VoteCounts())
             group.movieVotes[movieId] = if (vote) {
                 currentVoteCount.copy(yes = currentVoteCount.yes + 1)
@@ -470,8 +455,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             val group = getPartyGroup(groupId) ?: return false
             if (group.genreMovieSuggestions.isEmpty()) return false
 
-            val userVotes = group.usersVoted.getOrPut(userId) { mutableListOf() }
-           // group.usersVoted[userId] = userVotes
             group.gameActive = true
 
             return updatePartyGroup(group, mapOf(

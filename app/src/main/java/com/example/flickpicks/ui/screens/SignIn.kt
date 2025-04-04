@@ -19,12 +19,10 @@ import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewModel()) {
-    // Field values
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false)}
 
-    // Error states
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var emailErrorMessage  by remember { mutableStateOf("")}
@@ -86,7 +84,6 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
                         popUpTo(Screens.Entry.screen) { inclusive = true }
                     }
                 } else {
-                    // If sign-in fails, display a message to the user
                     Log.w("SignIn", "signInWithEmail:failure", task.exception)
                     val exceptionMessage = task.exception?.message ?: "Unknown error"
                     when {
@@ -116,7 +113,6 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Email
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -137,7 +133,6 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
             )
         }
 
-        // PASSWORD
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -176,19 +171,5 @@ fun SignIn(navController: NavController, viewModel: SignInViewModel = hiltViewMo
         ) {
             Text("Sign In")
         }
-
-
-        // Display user details after successful sign-in
-        /*
-        if (userDetails.isNotEmpty()) {
-            Text(
-                text = userDetails,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        }
-
-         */
     }
 }

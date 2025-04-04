@@ -40,7 +40,6 @@ fun SignUp(
     navController: NavController,
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
-    // Field values
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -49,7 +48,6 @@ fun SignUp(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false)}
 
-    // Error states for each field
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
@@ -58,7 +56,6 @@ fun SignUp(
     var passwordError by remember { mutableStateOf(false) }
 
 
-    // Error messages for each field
     var firstNameErrorMessage by remember { mutableStateOf("") }
     var lastNameErrorMessage by remember { mutableStateOf("") }
     var emailErrorMessage  by remember { mutableStateOf("") }
@@ -69,17 +66,6 @@ fun SignUp(
     var auth = FirebaseAuth.getInstance()
     var firebaseErrorMessage by remember { mutableStateOf("") }
     val signUpViewModel: SignUpViewModel = hiltViewModel()
-
-        // Mark fields as error if they're empty
-    fun validateFields() {
-        firstNameError = firstName.isBlank()
-        lastNameError = lastName.isBlank()
-        emailError = email.isBlank()
-        phoneError = phoneNumber.isBlank()
-        usernameError = username.isBlank()
-        passwordError = password.isBlank()
-
-    }
 
     fun validatePhoneNumber(): Boolean {
         if (phoneNumber.isBlank()) {
@@ -164,13 +150,11 @@ suspend fun validateUsername(): Boolean {
             return
         }
 
-        // Combine first and last name
         val fullName = "$firstName $lastName".trim()
 
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Sign-up successful
                     Log.d("SignUp", "createUserWithEmail:success")
                     val firebaseUser = auth.currentUser
 
@@ -185,7 +169,6 @@ suspend fun validateUsername(): Boolean {
                     )
 
                     userProfileViewModel.addUserProfile(userProfile)
-                    // save session
                     firebaseUser?.let { user ->
                         signUpViewModel.saveSession(user.uid, email)
                     }
@@ -194,7 +177,6 @@ suspend fun validateUsername(): Boolean {
                         popUpTo(Screens.Entry.screen) { inclusive = true }
                     }
                 } else {
-                    // Sign-up failed
                     Log.w("SignUp", "createUserWithEmail:failure", task.exception)
                     val exceptionMessage = task.exception?.message ?: "Unknown error"
                     when {
@@ -227,7 +209,6 @@ suspend fun validateUsername(): Boolean {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // FIRST NAME
         OutlinedTextField(
             value = firstName,
             onValueChange = {
@@ -246,7 +227,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // LAST NAME
         OutlinedTextField(
             value = lastName,
             onValueChange = {
@@ -265,7 +245,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // EMAIL
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -284,7 +263,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // PHONE NUMBER
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = {
@@ -303,7 +281,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // USERNAME
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -322,7 +299,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // PASSWORD
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -361,7 +337,6 @@ suspend fun validateUsername(): Boolean {
             )
         }
 
-        // Complete Sign Up Button
         val scope = rememberCoroutineScope()
         Button(
             onClick = {
