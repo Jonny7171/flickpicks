@@ -14,7 +14,6 @@ class UserProfileRepositoryTest {
 
     @BeforeEach
     fun setUp() {
-        // Set up the mock in-memory database
         mockDb = UserProfileInMemoryDatabase()
         repository = UserProfileRepository(mockDb)
     }
