@@ -44,10 +44,9 @@ class SignUpViewModelTest {
     @Test
     fun `saveSession should call session repository with correct value after sign up`() = runTest {
 
-        val userID = "abc123signup"
-        val email = "test123signup@email.com"
+        val userID = "neha123signup"
+        val email = "neha123signup@email.com"
 
-        // simulate success from Firebase and session save
         viewModel.saveSession(userID, email)
 
         advanceUntilIdle()

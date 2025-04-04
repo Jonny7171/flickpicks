@@ -57,14 +57,13 @@ class AddMemberViewModelTest {
 
     @Test
     fun `searchUsers with blank query returns empty userList`() = runTest {
-        viewModel.searchUsers("   ") // blank input
+        viewModel.searchUsers("   ")
         advanceUntilIdle()
         assertEquals(emptyList<UserProfile>(), viewModel.userList.value)
     }
 
     @Test
     fun `searchUsers builds correct Firestore query chain`() = runTest {
-        // Arrange
         `when`(firestore.collection("users")).thenReturn(collectionReference)
         `when`(collectionReference.orderBy("userName")).thenReturn(query)
         `when`(query.startAt("A")).thenReturn(query)

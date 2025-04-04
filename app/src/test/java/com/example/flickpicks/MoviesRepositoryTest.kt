@@ -25,19 +25,15 @@ class MoviesRepositoryTest {
 
     @Test
     fun getTrendingMovies() = runBlocking {
-        // Mock data
         val movies = listOf(
             Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url"),
             Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0", "url")
         )
 
-        // Mock API response
         `when`(moviesSource.getTrendingMovies()).thenReturn(movies)
 
-        // Call function
         val result = moviesRepository.getTrendingMovies()
 
-        // Verify results
         Assertions.assertEquals(2, result.size)
         Assertions.assertEquals("Movie A", result[0].title)
         Assertions.assertEquals("Movie B", result[1].title)
@@ -45,16 +41,12 @@ class MoviesRepositoryTest {
 
     @Test
     fun getMovieDetails() = runBlocking {
-        // Mock data
         val movie = Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url")
 
-        // Mock API response
         `when`(moviesSource.getMovieDetails("1")).thenReturn(movie)
 
-        // Call function
         val result = moviesRepository.getMovieDetails("1")
 
-        // Verify results
         Assertions.assertNotNull(result)
         Assertions.assertEquals("1", result.id)
         Assertions.assertEquals("Movie A", result.title)
@@ -62,16 +54,12 @@ class MoviesRepositoryTest {
 
     @Test
     fun getMovieWatchProviders() = runBlocking {
-        // Mock data
         val providers = listOf("Netflix", "Hulu", "Disney+")
 
-        // Mock API response
         `when`(moviesSource.getMovieWatchProviders("1")).thenReturn(providers)
 
-        // Call function
         val result = moviesRepository.getMovieWatchProviders("1")
 
-        // Verify results
         Assertions.assertEquals(3, result.size)
         Assertions.assertTrue(result.contains("Netflix"))
         Assertions.assertTrue(result.contains("Hulu"))
@@ -80,19 +68,15 @@ class MoviesRepositoryTest {
 
     @Test
     fun getMoviesByGenres() = runBlocking {
-        // Mock data
         val movies = listOf(
             Movie("1", "Movie A", "2024-01-01", "Overview A", "", listOf("Action"), "", "7.5", "url"),
             Movie("2", "Movie B", "2024-01-02", "Overview B", "", listOf("Drama"), "", "8.0", "url")
         )
 
-        // Mock API response
         `when`(moviesSource.getMoviesByGenres(listOf("Action"))).thenReturn(movies.filter { "Action" in it.genres })
 
-        // Call function
         val result = moviesRepository.getMoviesByGenres(listOf("Action"))
 
-        // Verify results
         Assertions.assertEquals(1, result.size)
         Assertions.assertEquals("Movie A", result[0].title)
     }
