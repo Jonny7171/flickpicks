@@ -22,31 +22,26 @@ fun UserPreferences(
     val userId = auth.currentUser?.uid
     val currentUserProfile = userProfileViewModel.userProfile.value
 
-    // If the user is not logged in, we can't proceed
     if (userId == null) {
         Text("You must be logged in to set preferences.")
         return
     }
 
-    // If the profile isn't loaded yet
     LaunchedEffect(userId) {
         if (currentUserProfile == null) {
             userProfileViewModel.fetchUserProfile(userId)
         }
     }
 
-    // genres from API
     val commonGenres = listOf(
         "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
         "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery",
         "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
     )
 
-    // Track selected genres
     val selectedGenres = remember { mutableStateListOf<String>() }
     var hasPopulated by remember { mutableStateOf(false) }
 
-    // prepopulate
     if (currentUserProfile != null && !hasPopulated) {
         selectedGenres.clear()
         selectedGenres.addAll(currentUserProfile.genrePreferences)
@@ -56,13 +51,11 @@ fun UserPreferences(
     var errorMessage by remember { mutableStateOf("") }
 
     fun finalizePreferences() {
-        // Require at least 2 genres
         if (selectedGenres.size < 2) {
             errorMessage = "Please select at least 2 genres."
             return
         }
 
-        // Update Firestore
         userProfileViewModel.updateUserProfile(userId, mapOf("genrePreferences" to selectedGenres))
 
         navController.navigate(Screens.MyFeed.screen) {
@@ -85,7 +78,6 @@ fun UserPreferences(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Chunk the genres list into rows of 2 items
             val chunkedGenres = commonGenres.chunked(2)
             LazyColumn {
                 items(chunkedGenres) { genreRow ->
@@ -123,7 +115,6 @@ fun UserPreferences(
             }
         }
 
-        // Error & "Complete" button
         Column {
             if (errorMessage.isNotEmpty()) {
                 Text(

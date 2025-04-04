@@ -17,14 +17,12 @@ class AddMemberViewModel @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : ViewModel() {
 
-    // Party group state
     private val _partyGroup = MutableStateFlow<PartyGroup?>(null)
     val partyGroup: StateFlow<PartyGroup?> = _partyGroup
 
     private val _memberNames = MutableStateFlow<Map<String, String>>(emptyMap())
     val memberNames: StateFlow<Map<String, String>> = _memberNames.asStateFlow()
 
-    // List of searched users
     private val _userList = MutableStateFlow<List<UserProfile>>(emptyList())
     val userList: StateFlow<List<UserProfile>> = _userList
 

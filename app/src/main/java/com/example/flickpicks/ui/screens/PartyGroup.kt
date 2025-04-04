@@ -165,7 +165,6 @@ fun ScheduleTimeTab(viewModel: PartyGroupViewModel, groupId: Int) {
             Text("Find Best Time")
         }
 
-        // Display Best Time
         Text(text = bestTime, fontSize = 18.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }

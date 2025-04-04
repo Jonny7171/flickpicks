@@ -43,7 +43,6 @@ fun Entry(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Sign In button
             Button(
                 onClick = {
                      navController.navigate(Screens.SignIn.screen)

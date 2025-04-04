@@ -54,7 +54,6 @@ class MovieReviewFirestoreDatabase : MovieReviewDatabase {
 
     private val db = Firebase.firestore
 
-    // Add a MovieReview
     override suspend fun add(movieReview: MovieReview): Boolean {
         return try {
             db.collection("movie_reviews").document(movieReview.id.toString()).set(movieReview).await()
@@ -66,7 +65,6 @@ class MovieReviewFirestoreDatabase : MovieReviewDatabase {
         }
     }
 
-    // Get a MovieReview
     override suspend fun get(reviewId: Int): MovieReview? {
         return try {
             val document = db.collection("movie_reviews").document(reviewId.toString()).get().await()
@@ -79,7 +77,6 @@ class MovieReviewFirestoreDatabase : MovieReviewDatabase {
         }
     }
 
-    // Update a MovieReview
     override suspend fun update(movieReview: MovieReview, updates: Map<String, Any>): Boolean {
         return try {
             db.collection("movie_reviews").document(movieReview.id.toString()).update(updates).await()
@@ -91,7 +88,6 @@ class MovieReviewFirestoreDatabase : MovieReviewDatabase {
         }
     }
 
-    // Delete a MovieReview
     override suspend fun delete(reviewId: Int): Boolean {
         return try {
             db.collection("movie_reviews").document(reviewId.toString()).delete().await()

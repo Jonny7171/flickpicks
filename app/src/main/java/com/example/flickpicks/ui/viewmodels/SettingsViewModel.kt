@@ -19,7 +19,6 @@ class SettingsViewModel @Inject constructor(
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             sessionRepository.clearSession()
-            //Firebase.auth.signOut()
             authManager.signOut()
             onComplete()
         }
