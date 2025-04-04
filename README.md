@@ -13,7 +13,7 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 6. Now, give the project a name of your choice. Set the Minimum SDK to API 24 and Build Configuration Language to Kotlin DSL and then click "Finish". 
 7. Once the project opens up, we will create an Android Virtual Device (AVD) from Device Manager on the right panel.
 8. Click on the "+" icon and select "Create Virtual Device"
-9. Next select an Android device of your choice (Pixel 7 or Pixel 8 is preferred) and click "Next" to continue.
+9. Next select an Android device of your choice (Pixel 8 or Pixel 9 is preferred) and click "Next" to continue.
 10. Download an API >= 24 for the device (API 33 or 35 is preferred) and click "Next" to continue.
 11. Once on the "Verify Configuration" page, ensure that the "Setup orientation" is set to Portrait and then click "Finish". 
 12. Now, on the top bar, click on the "Sync Project with Gradle Files" (elephant) icon.
