@@ -38,13 +38,10 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
     override suspend fun add(group: PartyGroup, userId: String): Boolean {
         val maxId = groups.keys.mapNotNull { it.toIntOrNull() }.maxOrNull() ?: 0
 
-        // Assign the next ID dynamically
         val newGroup = group.copy(id = maxId + 1)
 
-        // Store in memory
         groups[newGroup.id.toString()] = newGroup
 
-        //Log.d("InMemoryDB", "Added new group with ID: ${newGroup.id}")
         return true
     }
 
@@ -83,13 +80,11 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         groupId: Int,
         onMessagesUpdated: (List<ChatMessage>) -> Unit
     ) {
-        // Ensure there’s a list of listeners for this group
         if (!messageListeners.containsKey(groupId)) {
             messageListeners[groupId] = mutableListOf()
         }
         messageListeners[groupId]?.add(onMessagesUpdated)
 
-        // Immediately send the current messages to the observer
         val messages =
             groups[groupId.toString()]?.chatMessages?.sortedBy { it.timestamp } ?: emptyList()
         onMessagesUpdated(messages)
@@ -102,7 +97,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
         return true
     }
 
-    // New function to get chat messages
+
     override suspend fun getChatMessages(groupId: Int): List<ChatMessage> {
         val group = groups[groupId.toString()] ?: return emptyList()
         return group.chatMessages ?: emptyList()
@@ -110,12 +105,12 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
 
     override suspend fun getUserPartyGroups(userId: String): List<PartyGroup> {
         return groups.values.filter { group ->
-            group.members.contains(userId) // Filter groups where user is a member
+            group.members.contains(userId)
         }
     }
 
     override suspend fun getTotalPartyGroupsCount(): Int {
-        return groups.size // Return total number of groups in memory
+        return groups.size
     }
 
     override suspend fun voteOnMovie(
@@ -187,7 +182,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
                 val groupsSnapshot = db.collection("party_groups").get().await()
                 val maxId = groupsSnapshot.documents
                     .mapNotNull { it.getLong("id")?.toInt() }
-                    .maxOrNull() ?: 0 // Default to 0 if no groups exist
+                    .maxOrNull() ?: 0
 
                 val newGroup = group.copy(id = maxId + 1)
                 // add group to firestore
@@ -205,7 +200,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             }
         }
 
-        // Get a PartyGroup
+
         override suspend fun get(groupId: Int): PartyGroup? {
             return try {
                 val document =
@@ -219,7 +214,7 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             }
         }
 
-        // Update a PartyGroup
+
         override suspend fun update(group: PartyGroup, updates: Map<String, Any>): Boolean {
             return try {
                 db.collection("party_groups").document(group.id.toString()).update(updates).await()
@@ -231,19 +226,16 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
             }
         }
 
-        // Delete a PartyGroup
+
         override suspend fun delete(groupId: Int): Boolean {
             return try {
                 val batch = db.batch()
 
-                // Get all users
                 val usersSnapshot = db.collection("users").get().await()
                 for (userDoc in usersSnapshot.documents) {
                     val userRef = userDoc.reference
                     batch.update(userRef, "partyGroups", FieldValue.arrayRemove(groupId))
                 }
-
-                // Delete group from party_groups
                 batch.delete(db.collection("party_groups").document(groupId.toString()))
 
                 batch.commit().await()
@@ -318,7 +310,6 @@ class PartyGroupInMemoryDatabase : PartyGroupDatabase {
                 val groupsSnapshot = db.collection("party_groups").get().await()
                 val allGroups = groupsSnapshot.toObjects(PartyGroup::class.java)
 
-                // Filter only groups where the userId is in the members list
                 val userGroups = allGroups.filter { it.members.contains(userId) }
 
                 Log.d(
