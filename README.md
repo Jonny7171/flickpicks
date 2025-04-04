@@ -5,8 +5,21 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 ## Video/Screenshots 
 
 ## Getting Started
-Instructions on how to install and launch your project. If you have any additional instructions that the TA needs, please put them here 
-(e.g., how to launch from a Docker container; how to install keys so that they can connect to your database and so on).
+1. Download the Final.apk file from version 1.0.0 release. 
+2. If Android Studio is installed on your machine, open the application.
+    a. If Android Studio is not installed on your machine, please install Android Studio from https://developer.android.com/studio based on your specific OS. 
+3. Once Android Studio is open, click on "New Project".
+4. In the New Project pop up, from "Phone and Tablet" templates, select "Empty Activity" and click "Next" to continue.
+5. Now, give the project a name of your choice. Set the Minimum SDK to API 24 and Build Configuration Language to Kotlin DSL and then click "Finish". 
+6. Once the project opens up, we will create an Android Virtual Device (AVD) from Device Manager on the right panel.
+7. Click on the "+" icon and select "Create Virtual Device"
+8. Next select an Android device of your choice (Pixel 7 or Pixel 8 is preferred) and click "Next" to continue.
+9. Download an API >= 24 for the device (API 33 or 35 is preferred) and click "Next" to continue.
+10. Once on the "Verify Configuration" page, ensure that the "Setup orientation" is set to Portrait and then click "Finish". 
+11. Now, on the top bar, click on the "Sync Project with Gradle Files" (elephant) icon.
+12. Once Gradle sync has completed successfully, click on the Run app icon from the top bar (ensure that your AVD device is selected).  
+13. Now, once the device is launched, drag and drop the Final.apk file from your Downloads to the device emulator.
+14. You will see the FlickPicks app pop up, click on the icon and the app will launch! Enjoy! 
 
 ## Team Details
 * Team number: LAB101-6
