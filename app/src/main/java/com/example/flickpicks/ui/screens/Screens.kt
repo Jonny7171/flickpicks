@@ -18,7 +18,8 @@ sealed class Screens (val screen: String){
     data object MemberSearch: Screens(screen="memberSearch/{groupId}") {
         fun createRoute(groupId: String) = "memberSearch/$groupId"
     }
-    data object MovieDetail : Screens(screen = "movieDetail/{movieId}") {
-        fun createRoute(movieId: String) = "movieDetail/$movieId"
+    data object MovieDetail : Screens(screen = "movieDetail/{movieId}/{goToAddReviewTab}") {
+        fun createRoute(movieId: String, goToAddReviewTab: Boolean = false) =
+            "movieDetail/$movieId/$goToAddReviewTab"
     }
 }
