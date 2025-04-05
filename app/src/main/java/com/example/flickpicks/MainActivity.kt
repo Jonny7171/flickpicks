@@ -285,8 +285,14 @@ class MainActivity : ComponentActivity() {
 
                 composable(Screens.MovieDetail.screen) { backStackEntry ->
                     val movieId = backStackEntry.arguments?.getString("movieId")
+                    val goToAddReviewTab = backStackEntry.arguments?.getString("goToAddReviewTab")?.toBoolean() ?: false
+
                     if (movieId != null) {
-                        MovieDetailScreen(movieId, navigationController)
+                        if (goToAddReviewTab) {
+                            MovieDetailScreen(movieId, navigationController, true)
+                        } else {
+                            MovieDetailScreen(movieId, navigationController)
+                        }
                     }
                 }
             }

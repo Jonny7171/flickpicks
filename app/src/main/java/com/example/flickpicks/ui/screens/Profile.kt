@@ -285,7 +285,7 @@ fun Profile(
                         userProfileViewModel.removeReview(review)
                     },
                     onEdit = { movieId ->
-                        navController.navigate(Screens.MovieDetail.createRoute(movieId))
+                        navController.navigate(Screens.MovieDetail.createRoute(movieId, true))
                     }
                 )
             }

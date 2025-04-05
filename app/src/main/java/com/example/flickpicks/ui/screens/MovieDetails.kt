@@ -57,6 +57,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun MovieDetailScreen(
     movieId: String,
     navController: NavController,
+    goToAddReviewTab: Boolean = false,
     viewModel: MyFeedViewModel = hiltViewModel()
 ) {
 
@@ -75,6 +76,12 @@ fun MovieDetailScreen(
 
     var selectedTab by remember { mutableStateOf("Overview") }
     val tabs = listOf("Overview", "Reviews", "Add Review")
+
+    LaunchedEffect(goToAddReviewTab) {
+        if (goToAddReviewTab) {
+            selectedTab = "Add Review"
+        }
+    }
 
     if (selectedMovie == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -132,7 +139,6 @@ fun MovieDetailScreen(
                 }
             }
         }
-
         when (selectedTab) {
             "Overview" -> OverviewTab(selectedMovie!!, watchProviders)
             "Reviews" -> ReviewsTab(movieReviews, movieId)

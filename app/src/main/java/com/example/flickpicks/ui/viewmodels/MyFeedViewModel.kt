@@ -207,7 +207,7 @@ class MyFeedViewModel @Inject constructor(
 
     suspend fun getFriendsMovieReviews(userId: String, movieId: String): MutableList<MovieReview> {
         val userProfile = userRepository.getUserProfile(userId)
-        val friendsIds = userProfile?.followers ?: emptyList()
+        val friendsIds = (userProfile?.followers ?: emptyList()) + userId
         val reviews = mutableListOf<MovieReview>()
 
         for (friendId in friendsIds) {
