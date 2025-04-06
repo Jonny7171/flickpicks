@@ -11,7 +11,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserSearchViewModel @Inject constructor() : ViewModel() {
-    // Holds the list of users matching the query
     val userList = mutableStateOf<List<UserProfile>>(emptyList())
 
     fun searchUsers(query: String) {
@@ -20,7 +19,6 @@ class UserSearchViewModel @Inject constructor() : ViewModel() {
             return
         }
         val firestore = FirebaseFirestore.getInstance()
-        // Query on usernames
         firestore.collection("users")
             .orderBy("userName")
             .startAt(query)
@@ -51,14 +49,12 @@ class UserSearchViewModel @Inject constructor() : ViewModel() {
         val currentUserRef = firestore.collection("users").document(currentUserId)
         val targetUserRef = firestore.collection("users").document(targetUser.id)
 
-        // Ensure request hasn been sent before
         currentUserRef.get().addOnSuccessListener { currentDoc ->
             val outgoing = currentDoc.get("outgoingRequests") as? List<String> ?: emptyList()
             if (outgoing.contains(targetUser.id)) {
                 onComplete(false, "Friend request already sent to ${targetUser.userName}")
                 return@addOnSuccessListener
             }
-            // update the outgoingRequests and incomingRequests field
             currentUserRef.update("outgoingRequests", FieldValue.arrayUnion(targetUser.id))
                 .addOnSuccessListener {
                     targetUserRef.update("incomingRequests", FieldValue.arrayUnion(currentUserId))

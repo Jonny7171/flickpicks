@@ -15,6 +15,6 @@ data class ChatMessage(
     @get:PropertyName("timestamp") @set:PropertyName("timestamp")
     var timestamp: Long = System.currentTimeMillis()
 ){
-    // No-argument constructor needed for Firestore
+
     constructor() : this("", "", false, 0L)
 }

@@ -65,7 +65,6 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
 
     private val db = Firebase.firestore
 
-    // Add a UserProfile
     override suspend fun add(profile: UserProfile): Boolean {
         return try {
             db.collection("users").document(profile.id.toString()).set(profile).await()
@@ -77,7 +76,6 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
         }
     }
 
-    // Get a UserProfile
     override suspend fun get(profileId: String): UserProfile? {
         return try {
             val document = db.collection("users").document(profileId).get().await()
@@ -90,7 +88,6 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
         }
     }
 
-    // Update a UserProfile
     override suspend fun update(profileId: String, updates: Map<String, Any>): Boolean {
         return try {
             db.collection("users").document(profileId).update(updates).await()
@@ -102,7 +99,6 @@ class UserProfileFirestoreDatabase : UserProfileDatabase {
         }
     }
 
-    // Delete a UserProfile
     override suspend fun delete(profileId: String): Boolean {
         return try {
             db.collection("users").document(profileId).delete().await()

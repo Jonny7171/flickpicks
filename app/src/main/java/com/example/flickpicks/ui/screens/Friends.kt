@@ -52,13 +52,11 @@ fun Friends(
     navController: NavController,
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
-    // Observe the user profile state
     val currentUserState = userProfileViewModel.userProfile
     val currentUser = currentUserState.value
 
     val auth = FirebaseAuth.getInstance()
 
-    // Ensure the current user's profile is fetched
     LaunchedEffect(auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null && currentUser == null) {
@@ -100,7 +98,6 @@ fun Friends(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Tabs: "Friends" and "Requests"
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

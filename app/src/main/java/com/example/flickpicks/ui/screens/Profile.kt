@@ -27,7 +27,6 @@ import com.example.flickpicks.data.model.MovieReview
 import com.example.flickpicks.ui.viewmodels.UserProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-private val avatarOptions = listOf("dog", "cat", "glasses", "miami")
 private val avatarMap = mapOf(
     "dog" to R.drawable.dog,
     "cat" to R.drawable.cat,
@@ -286,7 +285,7 @@ fun Profile(
                         userProfileViewModel.removeReview(review)
                     },
                     onEdit = { movieId ->
-                        navController.navigate(Screens.MovieDetail.createRoute(movieId))
+                        navController.navigate(Screens.MovieDetail.createRoute(movieId, true))
                     }
                 )
             }

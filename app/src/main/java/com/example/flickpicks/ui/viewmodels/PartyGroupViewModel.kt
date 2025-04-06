@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.repository.MoviesRepository
-import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.PartyGroupRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -16,21 +15,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PartyGroupViewModel @Inject constructor(
     val userRepository: UserProfileRepository,
-    val moviesRepository: MoviesRepository
+    val moviesRepository: MoviesRepository,
+    val repository: PartyGroupRepository
 ) : ViewModel() {
-    val repository = PartyGroupRepository(PartyGroupFirestoreDatabase())
     private val _userPartyGroups = mutableStateListOf<PartyGroup>()
     val userPartyGroups: List<PartyGroup> get() = _userPartyGroups
 
     private val _messages =
-        MutableStateFlow<List<ChatMessage>>(emptyList()) // Mutable Flow for Live Updates
+        MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -189,24 +187,35 @@ class PartyGroupViewModel @Inject constructor(
                     document.get("timesAvailable") as? Map<String, Map<String, List<String>>>
                         ?: return@addOnSuccessListener
 
-                val dayFrequency = mutableMapOf<String, Int>()
-                val timeFrequency = mutableMapOf<String, Int>()
-
-                // Count votes for each day & time
+                val allDays = mutableListOf<Set<String>>()
+                val allTimes = mutableListOf<Set<String>>()
                 for (userAvailability in timesAvailable.values) {
-                    userAvailability["days"]?.forEach { day ->
-                        dayFrequency[day] = dayFrequency.getOrDefault(day, 0) + 1
-                    }
-                    userAvailability["times"]?.forEach { time ->
-                        timeFrequency[time] = timeFrequency.getOrDefault(time, 0) + 1
-                    }
+                    val userDays = userAvailability["days"]?.toSet() ?: emptySet()
+                    val userTimes = userAvailability["times"]?.toSet() ?: emptySet()
+
+                    if (userDays.isNotEmpty()) allDays.add(userDays)
+                    if (userTimes.isNotEmpty()) allTimes.add(userTimes)
                 }
 
-                // Find most common day & time
-                val bestDay = dayFrequency.maxByOrNull { it.value }?.key ?: "No best day"
-                val bestTime = timeFrequency.maxByOrNull { it.value }?.key ?: "No best time"
+                if (allDays.isEmpty() || allTimes.isEmpty()) {
+                    onResult("You haven't selected your availability")
+                    return@addOnSuccessListener
+                }
+
+                val commonDays = allDays.reduce { acc, set -> acc.intersect(set) }
+                val commonTimes = allTimes.reduce { acc, set -> acc.intersect(set) }
+
+                if (commonDays.isEmpty() || commonTimes.isEmpty()) {
+                    onResult("No common times available")
+                    return@addOnSuccessListener
+                }
+
+                val bestDay = commonDays.first()
+                val bestTime = commonTimes.first()
 
                 onResult("$bestDay at $bestTime")
+
+
             }
             .addOnFailureListener {
                 onResult("Error finding best time")
@@ -239,8 +248,3 @@ class PartyGroupViewModel @Inject constructor(
     }
 
 }
-
-
-
-
-

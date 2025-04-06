@@ -40,13 +40,12 @@ import com.example.flickpicks.ui.viewmodels.PartyGroupViewModel
 fun ChatScreen(navController: NavController, viewModel: PartyGroupViewModel = hiltViewModel(), groupId: Int) {
     var message by remember { mutableStateOf("") }
 
-    // Listen for messages using collectAsState
     val messages by viewModel.messages.collectAsState()
     val userName by viewModel.currentUserName.collectAsState()
 
     LaunchedEffect(groupId) {
         viewModel.loadMessages(groupId)
-        viewModel.loadCurrentUserName()// Start listening when screen opens
+        viewModel.loadCurrentUserName()
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
@@ -65,7 +64,7 @@ fun ChatScreen(navController: NavController, viewModel: PartyGroupViewModel = hi
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            reverseLayout = false // New messages appear at the bottom
+            reverseLayout = false
         ) {
             items(messages) { msg ->
                 ChatBubble(msg, currentUserName = userName?: "Unknown")
