@@ -3,6 +3,7 @@
 FlickPicks is a movie review app. Users can enter movies they have watched, and rate and review using a star rating and text. Users can add friends on the app to see their ratings and reviews. Users can also find movies to watch with friends. Friends will be shown the same set of movies to like/non-like using a swipe method. Any movies liked by both users will be shown as the suggested movie to watch for both users.
 
 ## Video/Screenshots 
+[![Watch our demo!](https://img.youtube.com/vi/WIaM8yfF8Uk/0.jpg)](https://youtube.com/watch?v=WIaM8yfF8Uk)
 
 ## Getting Started
 1. Download the Final.apk file from version 1.0.0 release. 
