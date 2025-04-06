@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.flickpicks.data.model.ChatMessage
 import com.example.flickpicks.data.model.PartyGroup
 import com.example.flickpicks.data.repository.MoviesRepository
-import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.PartyGroupRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -16,16 +15,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PartyGroupViewModel @Inject constructor(
     val userRepository: UserProfileRepository,
-    val moviesRepository: MoviesRepository
+    val moviesRepository: MoviesRepository,
+    val repository: PartyGroupRepository
 ) : ViewModel() {
-    val repository = PartyGroupRepository(PartyGroupFirestoreDatabase())
     private val _userPartyGroups = mutableStateListOf<PartyGroup>()
     val userPartyGroups: List<PartyGroup> get() = _userPartyGroups
 
@@ -250,8 +248,3 @@ class PartyGroupViewModel @Inject constructor(
     }
 
 }
-
-
-
-
-

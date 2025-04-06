@@ -5,6 +5,8 @@ import com.example.flickpicks.data.database.SessionDao
 import com.example.flickpicks.data.database.UserSessionDB
 import com.example.flickpicks.data.repository.MovieReviewDatabase
 import com.example.flickpicks.data.repository.MovieReviewFirestoreDatabase
+import com.example.flickpicks.data.repository.PartyGroupDatabase
+import com.example.flickpicks.data.repository.PartyGroupFirestoreDatabase
 import com.example.flickpicks.data.repository.UserProfileDatabase
 import com.example.flickpicks.data.repository.UserProfileFirestoreDatabase
 import com.example.flickpicks.data.repository.UserSessionRepository
@@ -40,6 +42,11 @@ object HiltModule {
         return MovieReviewFirestoreDatabase()
     }
 
+    @Provides
+    @Singleton
+    fun providePartyGroupDatabase(): PartyGroupDatabase {
+        return PartyGroupFirestoreDatabase()
+    }
 
     @Provides
     @Singleton

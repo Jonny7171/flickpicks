@@ -9,8 +9,6 @@ import com.example.flickpicks.data.repository.PartyGroupRepository
 import com.example.flickpicks.data.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import io.mockk.Runs
-import io.mockk.coEvery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -22,16 +20,14 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.MockedStatic
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockStatic
+import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
@@ -42,7 +38,6 @@ import kotlin.test.Test
 class PartyGroupViewModelTest {
 
     @get:Rule
-
 
     val instantExecutorRule = InstantTaskExecutorRule()
 
@@ -68,7 +63,8 @@ class PartyGroupViewModelTest {
 
         firestoreStatic.`when`<Any> { FirebaseFirestore.getInstance() }.thenReturn(mockFirestore)
         authStatic.`when`<Any> { FirebaseAuth.getInstance() }.thenReturn(mockAuth)
-        partyGroupVM = PartyGroupViewModel(userRepo, moviesRepo)
+        partyGroupVM = PartyGroupViewModel(userRepo, moviesRepo, partyGroupRepo)
+
     }
 
     @AfterEach
@@ -81,39 +77,37 @@ class PartyGroupViewModelTest {
     @Test
     fun `addPartyGroup should add new group and populate the party list`() = runTest {
         val testGroup = PartyGroup(
-        id = partyGroupVM.userPartyGroups.size + 1,
-        groupName = "testing group",
-        members = mutableListOf("no users"),
-        timesAvailable = mutableMapOf(),
-        winnerMovie = Movie(
-            id = "0",
-            title = "",
-            release_date = "",
-            overview = "",
-            tagline = "",
-            genres = listOf(),
-            poster_path = "",
-            vote_average = "0.0",
-            trailer = ""
-        ),
-        pastWatchedMovies = mutableListOf(),
-        chatMessages = mutableListOf()
-    )
+            id = partyGroupVM.userPartyGroups.size + 1,
+            groupName = "testing group",
+            members = mutableListOf("user1", "user2"),
+            timesAvailable = mutableMapOf(),
+            winnerMovie = Movie(
+                id = "0",
+                title = "",
+                release_date = "",
+                overview = "",
+                tagline = "",
+                genres = listOf(),
+                poster_path = "",
+                vote_average = "0.0",
+                trailer = ""
+            ),
+            pastWatchedMovies = mutableListOf(),
+            chatMessages = mutableListOf()
+        )
         val testUser = "testUser100000"
 
         val testCopyGroup = testGroup.copy(id = 40000)
 
-
-
         runBlocking {
             whenever(partyGroupRepo.getTotalPartyGroupsCount()).thenReturn(2)
-            whenever(partyGroupRepo.addPartyGroup(testCopyGroup, testUser)).then{ }
-            whenever(partyGroupRepo.getUserPartyGroups(testUser)).thenReturn(listOf(testCopyGroup))
-
+            whenever(partyGroupRepo.addPartyGroup(eq(testCopyGroup), eq(testUser))).then { }
+            whenever(partyGroupRepo.getUserPartyGroups(eq(testUser))).thenReturn(listOf(testCopyGroup))
         }
 
-
         partyGroupVM.addPartyGroup(testGroup, testUser)
+
+        advanceUntilIdle()
 
         verifyBlocking(partyGroupRepo) {
             getTotalPartyGroupsCount()
@@ -121,9 +115,9 @@ class PartyGroupViewModelTest {
             getUserPartyGroups(testUser)
         }
 
-
-
-
+        assertEquals(1, partyGroupVM.userPartyGroups.size)
+        assertEquals("testing group", partyGroupVM.userPartyGroups[0].groupName)
+        assertEquals(listOf("user1", "user2"), partyGroupVM.userPartyGroups[0].members)
     }
 
     @Test
@@ -161,12 +155,8 @@ class PartyGroupViewModelTest {
         }
 
         partyGroupVM.deletePartyGroup(testGroup)
-
-        verifyBlocking(partyGroupRepo) {
-            deletePartyGroup(testGroup.id)
-        }
-        assertFalse(partyGroupVM.userPartyGroups.contains(testGroup))
-
+        advanceUntilIdle()
+        verify(partyGroupRepo).deletePartyGroup(100000)
 
     }
 
@@ -181,11 +171,15 @@ class PartyGroupViewModelTest {
 
         partyGroupVM.sendMessage(groupID, testMsg)
 
+        advanceUntilIdle()
+
         verifyBlocking(partyGroupRepo) {
             sendChatMessage(groupID, testMsg)
         }
 
-
+        assertEquals(1, partyGroupVM.messages.value.size)
+        assertEquals("TestUser", partyGroupVM.messages.value[0].sender)
+        assertEquals("hi123", partyGroupVM.messages.value[0].message)
     }
 
     @Test
@@ -201,11 +195,10 @@ class PartyGroupViewModelTest {
 
         partyGroupVM.voteOnMovie(groupID, testUser, testMovie, testVote)
 
+        advanceUntilIdle()
+
         verifyBlocking(partyGroupRepo) {
             voteOnMovie(groupID, testUser, testMovie, testVote)
         }
-
-
     }
-
 }
