@@ -189,22 +189,35 @@ class PartyGroupViewModel @Inject constructor(
                     document.get("timesAvailable") as? Map<String, Map<String, List<String>>>
                         ?: return@addOnSuccessListener
 
-                val dayFrequency = mutableMapOf<String, Int>()
-                val timeFrequency = mutableMapOf<String, Int>()
-
+                val allDays = mutableListOf<Set<String>>()
+                val allTimes = mutableListOf<Set<String>>()
                 for (userAvailability in timesAvailable.values) {
-                    userAvailability["days"]?.forEach { day ->
-                        dayFrequency[day] = dayFrequency.getOrDefault(day, 0) + 1
-                    }
-                    userAvailability["times"]?.forEach { time ->
-                        timeFrequency[time] = timeFrequency.getOrDefault(time, 0) + 1
-                    }
+                    val userDays = userAvailability["days"]?.toSet() ?: emptySet()
+                    val userTimes = userAvailability["times"]?.toSet() ?: emptySet()
+
+                    if (userDays.isNotEmpty()) allDays.add(userDays)
+                    if (userTimes.isNotEmpty()) allTimes.add(userTimes)
                 }
 
-                val bestDay = dayFrequency.maxByOrNull { it.value }?.key ?: "No best day"
-                val bestTime = timeFrequency.maxByOrNull { it.value }?.key ?: "No best time"
+                if (allDays.isEmpty() || allTimes.isEmpty()) {
+                    onResult("You haven't selected your availability")
+                    return@addOnSuccessListener
+                }
+
+                val commonDays = allDays.reduce { acc, set -> acc.intersect(set) }
+                val commonTimes = allTimes.reduce { acc, set -> acc.intersect(set) }
+
+                if (commonDays.isEmpty() || commonTimes.isEmpty()) {
+                    onResult("No common times available")
+                    return@addOnSuccessListener
+                }
+
+                val bestDay = commonDays.first()
+                val bestTime = commonTimes.first()
 
                 onResult("$bestDay at $bestTime")
+
+
             }
             .addOnFailureListener {
                 onResult("Error finding best time")
