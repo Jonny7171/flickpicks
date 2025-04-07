@@ -6,7 +6,7 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 [![Watch our demo!](https://img.youtube.com/vi/WIaM8yfF8Uk/0.jpg)](https://youtube.com/watch?v=WIaM8yfF8Uk)
 
 ## Getting Started
-1. Download the Final.apk file from version 1.0.0 release. 
+1. Download the Final_Submission.apk file from version 1.1.0 release. 
 2. If Android Studio is installed on your machine, open the application.
 3. If Android Studio is not installed on your machine, please install the latest version of Android Studio from https://developer.android.com/studio based on your specific OS. 
 4. Once Android Studio is open, click on "New Project".
@@ -19,8 +19,8 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 11. Once on the "Verify Configuration" page, ensure that the "Setup orientation" is set to Portrait and then click "Finish". 
 12. Now, on the top bar, click on the "Sync Project with Gradle Files" (elephant) icon.
 13. Once Gradle sync has completed successfully, click on the Run app icon from the top bar (ensure that your AVD device is selected).  
-14. Now, once the device is launched, drag and drop the Final.apk file from your Downloads to the device emulator.
-15. Once it says "Final.apk Installed", you will see the FlickPicks app launcher pop up, click on the icon and the app will launch! Enjoy! 
+14. Now, once the device is launched, drag and drop the Final_Submission.apk file from your Downloads to the device emulator.
+15. Once it says "Final_Submission.apk Installed", you will see the FlickPicks app launcher pop up, click on the icon and the app will launch! Enjoy! 
 
 ## Team Details
 * Team number: LAB101-6
