@@ -20,7 +20,7 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 12. Now, on the top bar, click on the "Sync Project with Gradle Files" (elephant) icon.
 13. Once Gradle sync has completed successfully, click on the Run app icon from the top bar (ensure that your AVD device is selected).  
 14. Now, once the device is launched, drag and drop the Final_Submission.apk file from your Downloads to the device emulator.
-15. Once it says "Final_Submission.apk Installed", you will see the FlickPicks app launcher pop up, click on the icon and the app will launch! Enjoy! 
+15. Once it says "Final_Submission.apk Successfully Installed", you will see the FlickPicks app launcher pop up, click on the icon and the app will launch! Enjoy! 
 
 ## Team Details
 * Team number: LAB101-6
@@ -48,6 +48,5 @@ FlickPicks is a movie review app. Users can enter movies they have watched, and 
 - [Version 0.3.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-0.3.0-Release)
 - [Version 1.0.0 Release](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-1.0.0-Release)
 - [Version 1.1.0 Release: Final submission](https://git.uwaterloo.ca/s3kadaki/flick-picks/-/wikis/Version-1.1.0-Release:-Final-submission)
-
 
 
