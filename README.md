@@ -1,4 +1,4 @@
-# FlickPicks 🎬
+# FlickPicks
 
 **FlickPicks** is a social movie discovery and review app built using Kotlin and Jetpack Compose.  
 Users can add friends, share reviews, and find movies to watch together through a collaborative swiping system.
@@ -8,10 +8,10 @@ Users can add friends, share reviews, and find movies to watch together through 
 ---
 
 ## Features
-- ⭐ Rate and review movies
-- 👥 Add friends and view their reviews
-- 🎯 Match with friends on movie choices using swipe-based liking
-- 📱 Mobile-first design (Android app)
+- Rate and review movies
+- Add friends and view their reviews
+- Match with friends on movie choices using swipe-based liking
+- Mobile-first design (Android app)
 
 ---
 
