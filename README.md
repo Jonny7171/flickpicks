@@ -3,7 +3,7 @@
 **FlickPicks** is a social movie discovery and review app built using Kotlin and Jetpack Compose.  
 Users can add friends, share reviews, and find movies to watch together through a collaborative swiping system.
 
-[➡️ Watch the demo video here](https://student.cs.uwaterloo.ca/~cs346/1259/project/gallery.html)
+[➡️ Watch the demo video here](https://www.youtube.com/watch?v=WIaM8yfF8Uk)
 
 ---
 
@@ -40,5 +40,5 @@ Team Members:
 - Jonathan Gagnon ([j23gagno@uwaterloo.ca](mailto:j23gagno@uwaterloo.ca))
 - Malvika Patel
 - Neha Padala
-- Shaili Kadakia
+- Shaili Kadakia ([shailikadakia@gmail.com](mailto:shailikadakia@gmail.com))
 
