@@ -38,7 +38,7 @@ Selected for the Winter 2025 Project Gallery (Top course projects showcase).
 
 Team Members:
 - Jonathan Gagnon ([j23gagno@uwaterloo.ca](mailto:j23gagno@uwaterloo.ca))
-- Malvika Patel
+- Malvika Patel ([malvika.patel510@gmail.com](mailto:malvika.patel510@gmail.com))
 - Neha Padala
 - Shaili Kadakia ([shailikadakia@gmail.com](mailto:shailikadakia@gmail.com))
 
